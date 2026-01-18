@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日程・会場案内 | 第35回 JTF翻訳祭 2026</title>
+
+    <!-- Google Fonts: Noto Sans JP for Japanese, Inter for English -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Noto+Sans+JP:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* Base Styles */
+        body {
+            font-family: 'Inter', 'Noto Sans JP', sans-serif;
+            background-color: #f5f5f7;
+            color: #1d1d1f;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Apple-style Typography helpers */
+        .text-gradient {
+            background: linear-gradient(135deg, #1d1d1f 0%, #434344 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .text-gradient-blue {
+            background: linear-gradient(135deg, #0071e3 0%, #42a1ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Animations */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .delay-100 { transition-delay: 100ms; }
+        .delay-200 { transition-delay: 200ms; }
+        .delay-300 { transition-delay: 300ms; }
+        .delay-400 { transition-delay: 400ms; }
+
+        /* Background Orbs */
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            mix-blend-mode: multiply;
+            filter: blur(60px);
+            opacity: 0.3;
+            animation: float 20s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(40px); }
+        }
+
+        /* Navbar Styles */
+        .nav-blur {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        /* Card Styles */
+        .venue-card {
+            background: white;
+            border-radius: 20px;
+            border: 1px solid #e5e5e7;
+            padding: 40px;
+            transition: all 0.3s ease;
+        }
+
+        .venue-card:hover {
+            border-color: #d1d1d6;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+        }
+
+        /* Timeline */
+        .timeline-item {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .timeline-dot {
+            width: 12px;
+            height: 12px;
+            background: linear-gradient(135deg, #0071e3 0%, #42a1ff 100%);
+            border-radius: 50%;
+            margin-top: 8px;
+            flex-shrink: 0;
+        }
+
+        .timeline-line {
+            position: absolute;
+            left: 5px;
+            top: 30px;
+            width: 2px;
+            height: calc(100% - 30px);
+            background: linear-gradient(180deg, #0071e3 0%, transparent 100%);
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <!-- Background Orbs -->
+    <div class="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-[-1]">
+        <div class="orb bg-blue-200 w-[400px] h-[400px] top-[10%] left-[-100px]"></div>
+        <div class="orb bg-purple-200 w-[350px] h-[350px] bottom-[20%] right-[-50px]" style="animation-delay: -7s;"></div>
+        <div class="orb bg-gray-200 w-[300px] h-[300px] top-[60%] left-[40%]" style="animation-delay: -12s;"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 nav-blur transition-all duration-300" id="navbar">
+        <div class="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
+            <a href="index.html" class="text-sm font-semibold tracking-wide hover:opacity-70 transition-opacity">JTF Translation Festival</a>
+            <div class="hidden md:flex space-x-8 text-xs font-medium text-gray-600">
+                <a href="index.html#concept" class="hover:text-black transition-colors">コンセプト</a>
+                <a href="sessions.html" class="hover:text-black transition-colors">セッション</a>
+                <a href="ticket.html" class="hover:text-black transition-colors">チケット</a>
+                <a href="index.html#news" class="hover:text-black transition-colors">お知らせ</a>
+                <a href="date-venue.html" class="text-black font-semibold">日程・会場</a>
+                <a href="mypage.html" class="hover:text-black transition-colors">マイページ</a>
+            </div>
+            <div class="md:hidden">
+                <button class="text-gray-800"><i class="fas fa-bars"></i></button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header Section -->
+    <header class="pt-32 pb-16 px-6 text-center">
+        <div class="max-w-4xl mx-auto reveal">
+            <p class="text-sm font-semibold text-blue-600 mb-4 tracking-wider uppercase">Date & Venue</p>
+            <h1 class="text-4xl md:text-6xl font-black tracking-tighter leading-tight mb-6 text-gradient">
+                日程・会場案内
+            </h1>
+            <p class="text-lg md:text-xl text-gray-500 font-medium max-w-2xl mx-auto leading-relaxed reveal delay-100">
+                第35回JTF翻訳祭は、昨年に続き横浜で開催されます。詳細なスケジュールと会場情報をご確認ください。
+            </p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-6 py-20">
+
+        <!-- Schedule Section -->
+        <section class="mb-24">
+            <h2 class="text-3xl md:text-4xl font-black mb-12 reveal text-gradient">開催スケジュール</h2>
+            
+            <div class="space-y-8 relative reveal delay-100">
+                <!-- OnDemand -->
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="flex-grow">
+                        <h3 class="text-lg font-bold mb-2">オンデマンド開催</h3>
+                        <p class="text-gray-600 font-medium mb-1">2026年10月1日（木）～10月31日（日）</p>
+                        <p class="text-sm text-gray-500">セッション動画をオンデマンド配信いたします。</p>
+                    </div>
+                </div>
+
+                <!-- In-person Event -->
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="flex-grow">
+                        <h3 class="text-lg font-bold mb-2">会場開催</h3>
+                        <p class="text-gray-600 font-medium mb-1">2026年11月13日（金）</p>
+                        <div class="bg-gray-50 p-4 rounded-lg mt-3">
+                            <p class="text-sm font-medium mb-2">【開催時間】</p>
+                            <p class="text-sm text-gray-600">開場・受付開始：9時30分</p>
+                            <p class="text-sm text-gray-600">終了：17時</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Networking Party -->
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="flex-grow">
+                        <h3 class="text-lg font-bold mb-2">交流パーティー</h3>
+                        <p class="text-gray-600 font-medium mb-1">2026年11月13日（金）</p>
+                        <div class="bg-gray-50 p-4 rounded-lg mt-3">
+                            <p class="text-sm font-medium mb-2">【パーティー時間】</p>
+                            <p class="text-sm text-gray-600">受付開始：17時30分</p>
+                            <p class="text-sm text-gray-600">開会：18時</p>
+                            <p class="text-sm text-gray-600">閉会：20時</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Venue Section -->
+        <section class="mb-24">
+            <h2 class="text-3xl md:text-4xl font-black mb-12 reveal text-gradient">会場情報</h2>
+
+            <!-- Seminar Venue -->
+            <div class="mb-16">
+                <h3 class="text-2xl font-bold mb-6 reveal delay-100">セミナー会場</h3>
+                <div class="venue-card reveal delay-200">
+                    <div class="flex flex-col md:flex-row gap-8 items-start">
+                        <div class="flex-grow">
+                            <h4 class="text-xl font-bold mb-2">横浜市開港記念会館（ジャックの塔）</h4>
+                            <p class="text-sm text-gray-500 mb-4 font-mono">〒231-0005　横浜市中区本町1丁目6番地</p>
+                            
+                            <div class="space-y-6">
+                                <!-- Description -->
+                                <div>
+                                    <h5 class="font-semibold text-sm mb-2 flex items-center gap-2">
+                                        <i class="fas fa-info-circle text-blue-600"></i>
+                                        施設について
+                                    </h5>
+                                    <p class="text-sm text-gray-600 leading-relaxed">
+                                        横浜市開港記念会館（通称：ジャックの塔）は、1917年に横浜港開港50周年を記念して建設された歴史的建造物です。辰野式フリークラシック様式の美しいレンガ造りが特徴で、塔の高さは約36メートル。関東大震災で一度焼失するも再建され、1989年には国の重要文化財に指定されました。館内には大正期の面影を残すステンドグラスや講堂があり、一般公開もされています。夜にはライトアップされ、横浜のランドマークとして親しまれています。
+                                    </p>
+                                </div>
+
+                                <!-- Train Access -->
+                                <div>
+                                    <h5 class="font-semibold text-sm mb-3 flex items-center gap-2">
+                                        <i class="fas fa-train text-blue-600"></i>
+                                        電車でお越しの方
+                                    </h5>
+                                    <ul class="space-y-2">
+                                        <li class="text-sm text-gray-600">• みなとみらい線「日本大通り駅」1番出口から徒歩1分（約50m）</li>
+                                        <li class="text-sm text-gray-600">• 市営地下鉄線「関内駅」1番出口から徒歩10分（約700m）</li>
+                                        <li class="text-sm text-gray-600">• JR京浜東北線・根岸線「関内駅」南口から徒歩10分（約700m）</li>
+                                    </ul>
+                                </div>
+
+                                <!-- Bus Access -->
+                                <div>
+                                    <h5 class="font-semibold text-sm mb-3 flex items-center gap-2">
+                                        <i class="fas fa-bus text-blue-600"></i>
+                                        バスでお越しの方
+                                    </h5>
+                                    <ul class="space-y-2">
+                                        <li class="text-sm text-gray-600">• 「開港記念会館前」から徒歩1分（約10m）</li>
+                                        <li class="text-sm text-gray-600">• 「本町1丁目」から徒歩1分（約50m）</li>
+                                        <li class="text-sm text-gray-600">• 「日本大通り駅・県庁前」から徒歩3分（約200m）</li>
+                                    </ul>
+                                </div>
+
+                                <!-- Notes -->
+                                <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-100">
+                                    <p class="text-xs text-gray-600"><i class="fas fa-exclamation-circle text-yellow-600 mr-2"></i>当施設に駐車場はありません</p>
+                                    <p class="text-xs text-gray-600 mt-2"><i class="fas fa-exclamation-circle text-yellow-600 mr-2"></i>会館は一般にも開放されているため、イベント参加者以外の来場者もいらっしゃいます。</p>
+                                </div>
+
+                                <!-- Website -->
+                                <div>
+                                    <a href="https://www.kaikokinenkaikan.com/" target="_blank" class="inline-flex items-center gap-2 text-blue-600 text-sm font-medium hover:underline">
+                                        <i class="fas fa-globe"></i>
+                                        ウェブサイト
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Networking Venue -->
+            <div>
+                <h3 class="text-2xl font-bold mb-6 reveal delay-100">交流パーティー会場</h3>
+                <div class="venue-card reveal delay-200">
+                    <div class="flex flex-col md:flex-row gap-8 items-start">
+                        <div class="flex-grow">
+                            <h4 class="text-xl font-bold mb-2">ロイヤルホールヨコハマ</h4>
+                            <p class="text-sm text-gray-500 mb-4 font-mono">〒231-8544 横浜市中区山下町90番地</p>
+                            
+                            <div class="space-y-6">
+                                <!-- Description -->
+                                <div>
+                                    <h5 class="font-semibold text-sm mb-2 flex items-center gap-2">
+                                        <i class="fas fa-info-circle text-blue-600"></i>
+                                        施設について
+                                    </h5>
+                                    <p class="text-sm text-gray-600 leading-relaxed">
+                                        ロイヤルホールヨコハマは、横浜・元町中華街エリアにある格式ある結婚式場兼大型ホールです。今回は、代表的な会場「ヴェルサイユの間」にて立食パーティーを予定しております。セミナー会場である横浜市開港記念会館からは、中華街方面へ徒歩約10分の距離にあります。
+                                    </p>
+                                </div>
+
+                                <!-- Train Access -->
+                                <div>
+                                    <h5 class="font-semibold text-sm mb-3 flex items-center gap-2">
+                                        <i class="fas fa-train text-blue-600"></i>
+                                        電車でお越しの方
+                                    </h5>
+                                    <ul class="space-y-2">
+                                        <li class="text-sm text-gray-600">• みなとみらい線「日本大通り駅」情文センター口・出口3より徒歩約2分</li>
+                                        <li class="text-sm text-gray-600">• JR「関内駅」南口より徒歩約8分</li>
+                                        <li class="text-sm text-gray-600">• JR「石川町駅」北口より徒歩約7分</li>
+                                        <li class="text-sm text-gray-600">• 横浜市営地下鉄「関内駅」出口1より徒歩約8分</li>
+                                        <li class="text-sm text-gray-600">• みなとみらい線「元町・中華街駅」山下公園口より徒歩約5分</li>
+                                    </ul>
+                                </div>
+
+                                <!-- Taxi Access -->
+                                <div>
+                                    <h5 class="font-semibold text-sm mb-3 flex items-center gap-2">
+                                        <i class="fas fa-taxi text-blue-600"></i>
+                                        タクシーをご利用の方
+                                    </h5>
+                                    <ul class="space-y-2">
+                                        <li class="text-sm text-gray-600">• JR「横浜駅」南口から：距離 約4.4km／所要時間 約15分／料金目安 約2,100円</li>
+                                        <li class="text-sm text-gray-600">• 「羽田空港」から：距離 約24.3km／所要時間 約63分／料金目安 約9,140円</li>
+                                    </ul>
+                                </div>
+
+                                <!-- Parking -->
+                                <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
+                                    <h5 class="font-semibold text-sm mb-2 flex items-center gap-2">
+                                        <i class="fas fa-parking text-blue-600"></i>
+                                        駐車場のご案内
+                                    </h5>
+                                    <p class="text-sm text-gray-600 mb-2">地下駐車場（収容台数：60台、高さ制限：2.2m）</p>
+                                    <p class="text-xs text-gray-600 mb-1">営業時間：10:00～21:00</p>
+                                    <ul class="space-y-1 text-xs text-gray-600">
+                                        <li>• 税込2,000円以上のご利用で1時間無料</li>
+                                        <li>• 税込3,000円以上のご利用で2時間無料（以後30分毎に300円）</li>
+                                    </ul>
+                                </div>
+
+                                <!-- Website -->
+                                <div>
+                                    <a href="https://www.royalhall.co.jp/" target="_blank" class="inline-flex items-center gap-2 text-blue-600 text-sm font-medium hover:underline">
+                                        <i class="fas fa-globe"></i>
+                                        ウェブサイト
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Map Section (Placeholder) -->
+        <section class="mb-24">
+            <h2 class="text-3xl md:text-4xl font-black mb-12 reveal text-gradient">アクセスマップ</h2>
+            <div class="venue-card reveal delay-100 h-96">
+                <div class="w-full h-full flex items-center justify-center bg-gray-100 rounded-lg">
+                    <div class="text-center">
+                        <i class="fas fa-map text-4xl text-gray-400 mb-4"></i>
+                        <p class="text-gray-500 font-medium">地図表示予定</p>
+                        <p class="text-sm text-gray-400">Google Maps または他地図サービスを埋め込み予定</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-black text-white py-16 px-6 mt-24">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
+                <div>
+                    <h3 class="font-semibold mb-4">JTF翻訳祭</h3>
+                    <p class="text-sm text-gray-400 leading-relaxed">日本最大級の翻訳業界カンファレンス。業界の最新トレンド、実践的なノウハウ、ネットワーキングの場を提供します。</p>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4 text-sm">リンク</h4>
+                    <div class="space-y-2">
+                        <a href="index.html" class="text-sm text-gray-400 hover:text-white transition-colors">ホーム</a>
+                        <a href="sessions.html" class="block text-sm text-gray-400 hover:text-white transition-colors">セッション</a>
+                        <a href="ticket.html" class="block text-sm text-gray-400 hover:text-white transition-colors">チケット</a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4 text-sm">ポリシー</h4>
+                    <div class="space-y-2">
+                        <a href="#" class="block text-sm text-gray-400 hover:text-white transition-colors">プライバシーポリシー</a>
+                        <a href="#" class="block text-sm text-gray-400 hover:text-white transition-colors">利用規約</a>
+                        <a href="#" class="block text-sm text-gray-400 hover:text-white transition-colors">お問い合わせ</a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4 text-sm">フォロー</h4>
+                    <div class="flex gap-4">
+                        <a href="#" class="text-gray-400 hover:text-blue-400 transition-colors"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-blue-400 transition-colors"><i class="fab fa-facebook"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-pink-400 transition-colors"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 pt-8 text-center text-sm text-gray-500">
+                <p>&copy; 2026 Japan Translation Federation. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        // --- 1. Animation Logic ---
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: "0px 0px -50px 0px"
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.reveal').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Navbar blur effect
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                navbar.classList.add('shadow-sm');
+            } else {
+                navbar.classList.remove('shadow-sm');
+            }
+        });
+    </script>
+</body>
+</html>
