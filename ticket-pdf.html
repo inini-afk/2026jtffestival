@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>入場チケット | 第35回 JTF翻訳祭 2026</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Noto+Sans+JP:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Noto Sans JP', sans-serif;
+            background: #f5f5f7;
+            padding: 40px 20px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .print-controls {
+            max-width: 800px;
+            margin: 0 auto 30px;
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+        }
+
+        .print-controls button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .print-btn {
+            background: #0071e3;
+            color: white;
+        }
+
+        .print-btn:hover {
+            background: #0077ed;
+        }
+
+        .back-btn {
+            background: #e5e5e7;
+            color: #1d1d1f;
+        }
+
+        .back-btn:hover {
+            background: #d1d1d3;
+        }
+
+        .ticket-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+        }
+
+        .ticket-header {
+            background: linear-gradient(135deg, #1d1d1f 0%, #434344 100%);
+            color: white;
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ticket-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .ticket-header-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .event-label {
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 8px;
+        }
+
+        .event-title {
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin-bottom: 4px;
+        }
+
+        .event-subtitle {
+            font-size: 18px;
+            font-weight: 500;
+            color: rgba(255,255,255,0.8);
+        }
+
+        .ticket-type-label {
+            display: inline-block;
+            margin-top: 20px;
+            background: linear-gradient(135deg, #0071e3 0%, #42a1ff 100%);
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .ticket-body {
+            padding: 40px;
+        }
+
+        .ticket-info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .ticket-info-item {
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 16px;
+        }
+
+        .ticket-info-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #888;
+            margin-bottom: 6px;
+        }
+
+        .ticket-info-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1d1d1f;
+        }
+
+        .ticket-info-value.mono {
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+            letter-spacing: 1px;
+        }
+
+        .ticket-divider {
+            border: none;
+            border-top: 2px dashed #e5e5e7;
+            margin: 32px 0;
+            position: relative;
+        }
+
+        .ticket-divider::before,
+        .ticket-divider::after {
+            content: '';
+            position: absolute;
+            top: -16px;
+            width: 32px;
+            height: 32px;
+            background: #f5f5f7;
+            border-radius: 50%;
+        }
+
+        .ticket-divider::before {
+            left: -56px;
+        }
+
+        .ticket-divider::after {
+            right: -56px;
+        }
+
+        .ticket-bottom {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 30px;
+        }
+
+        .qr-code {
+            width: 140px;
+            height: 140px;
+            background: white;
+            border: 2px solid #e5e5e7;
+            border-radius: 12px;
+            padding: 10px;
+            flex-shrink: 0;
+        }
+
+        .qr-code svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .ticket-instructions {
+            flex-grow: 1;
+        }
+
+        .ticket-instructions h4 {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #1d1d1f;
+        }
+
+        .ticket-instructions ul {
+            list-style: none;
+            font-size: 12px;
+            color: #666;
+            line-height: 1.8;
+        }
+
+        .ticket-instructions li::before {
+            content: '•';
+            color: #0071e3;
+            margin-right: 8px;
+        }
+
+        .ticket-footer {
+            background: #fafafa;
+            padding: 20px 40px;
+            text-align: center;
+            font-size: 11px;
+            color: #888;
+            border-top: 1px solid #e5e5e7;
+        }
+
+        /* Print Styles */
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+
+            .print-controls {
+                display: none;
+            }
+
+            .ticket-container {
+                box-shadow: none;
+                border-radius: 0;
+            }
+
+            .ticket-divider::before,
+            .ticket-divider::after {
+                background: white;
+            }
+        }
+
+        @page {
+            size: A4;
+            margin: 20mm;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Print Controls -->
+    <div class="print-controls">
+        <button class="back-btn" onclick="window.close()">
+            ← マイページに戻る
+        </button>
+        <button class="print-btn" onclick="window.print()">
+            印刷 / PDF保存
+        </button>
+    </div>
+
+    <!-- Ticket -->
+    <div class="ticket-container">
+        <div class="ticket-header">
+            <div class="ticket-header-content">
+                <p class="event-label">The 35th JTF Translation Festival</p>
+                <h1 class="event-title">第35回 JTF翻訳祭 2026</h1>
+                <p class="event-subtitle">入場チケット / Admission Ticket</p>
+                <span class="ticket-type-label">会場・交流パーティー参加＆オンデマンド視聴</span>
+            </div>
+        </div>
+
+        <div class="ticket-body">
+            <div class="ticket-info-grid">
+                <div class="ticket-info-item">
+                    <p class="ticket-info-label">参加者名 / Name</p>
+                    <p class="ticket-info-value">テスト太郎</p>
+                </div>
+                <div class="ticket-info-item">
+                    <p class="ticket-info-label">チケット番号 / Ticket No.</p>
+                    <p class="ticket-info-value mono">JTF2026-00001234</p>
+                </div>
+                <div class="ticket-info-item">
+                    <p class="ticket-info-label">開催日 / Date</p>
+                    <p class="ticket-info-value">2026年11月◯日（◯）</p>
+                </div>
+                <div class="ticket-info-item">
+                    <p class="ticket-info-label">会場 / Venue</p>
+                    <p class="ticket-info-value">Coming Soon</p>
+                </div>
+            </div>
+
+            <hr class="ticket-divider">
+
+            <div class="ticket-bottom">
+                <div class="qr-code">
+                    <!-- Simple QR Code SVG Pattern (Demo) -->
+                    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Position Detection Patterns -->
+                        <rect x="0" y="0" width="28" height="28" fill="#1d1d1f"/>
+                        <rect x="4" y="4" width="20" height="20" fill="white"/>
+                        <rect x="8" y="8" width="12" height="12" fill="#1d1d1f"/>
+
+                        <rect x="72" y="0" width="28" height="28" fill="#1d1d1f"/>
+                        <rect x="76" y="4" width="20" height="20" fill="white"/>
+                        <rect x="80" y="8" width="12" height="12" fill="#1d1d1f"/>
+
+                        <rect x="0" y="72" width="28" height="28" fill="#1d1d1f"/>
+                        <rect x="4" y="76" width="20" height="20" fill="white"/>
+                        <rect x="8" y="80" width="12" height="12" fill="#1d1d1f"/>
+
+                        <!-- Data Pattern (Random for demo) -->
+                        <rect x="36" y="0" width="4" height="4" fill="#1d1d1f"/>
+                        <rect x="44" y="0" width="4" height="4" fill="#1d1d1f"/>
+                        <rect x="52" y="0" width="4" height="4" fill="#1d1d1f"/>
+                        <rect x="60" y="4" width="4" height="4" fill="#1d1d1f"/>
+                        <rect x="36" y="8" width="4" height="4" fill="#1d1d1f"/>
+                        <rect x="48" y="8" width="4" height="4" fill="#1d1d1f"/>
+                        <rect x="56" y="12" width="4" height="4" fill="#1d1d1f"/>
+                        <rect x="64" y="8" width="4" height="4" fill="#1d1d1f"/>
+
+                        <rect x="0" y="36" width="4" height="4" fill="#1d1d1f"/>
+                        <rect x="8" y="40" width="4" height="4" fill="#1d1d1f"/>
+                        <rect x="16" y="36" width="4" height="4" fill="#1d1d1f"/>
+                        <rect x="24" y="44" width="4" height="4" fill="#1d1d1f"/>
+                        <rect x="4" y="52" width="4" height="4" fill="#1d1d1f"/>
+                        <rect x="12" y="56" width="4" height="4" fill="#1d1d1f"/>
+                        <rect x="20" y="52" width="4" height="4" fill="#1d1d1f"/>
+
+                        <rect x="36" y="36" width="4" height="4" fill="#1d1d1f"/>
+                        <rect x="44" y="40" width="4" height="4" fill="#1d1d1f"/>
+                        <rect x="52" y="36" width="4" height="4" fill="#1d1d1f"/>
+                        <rect x="40" y="48" width="4" height="4" fill="#1d1d1f"/>
+                        <rect x="48" y="52" width="4" height="4" fill="#1d1d1f"/>
+                        <rect x="56" y="44" width="4" height="4" fill="#1d1d1f"/>
+                        <rect x="60" y="56" width="4" height="4" fill="#1d1d1f"/>
+
+                        <rect x="72" y="36" width="4" height="4" fill="#1d1d1f"/>
+                        <rect x="80" y="40" width="4" height="4" fill="#1d1d1f"/>
+                        <rect x="88" y="36" width="4" height="4" fill="#1d1d1f"/>
+                        <rect x="76" y="48" width="4" height="4" fill="#1d1d1f"/>
+                        <rect x="84" y="52" width="4" height="4" fill="#1d1d1f"/>
+                        <rect x="92" y="44" width="4" height="4" fill="#1d1d1f"/>
+                        <rect x="96" y="56" width="4" height="4" fill="#1d1d1f"/>
+
+                        <rect x="36" y="72" width="4" height="4" fill="#1d1d1f"/>
+                        <rect x="44" y="76" width="4" height="4" fill="#1d1d1f"/>
+                        <rect x="52" y="72" width="4" height="4" fill="#1d1d1f"/>
+                        <rect x="60" y="80" width="4" height="4" fill="#1d1d1f"/>
+                        <rect x="40" y="84" width="4" height="4" fill="#1d1d1f"/>
+                        <rect x="48" y="88" width="4" height="4" fill="#1d1d1f"/>
+                        <rect x="56" y="92" width="4" height="4" fill="#1d1d1f"/>
+                        <rect x="64" y="76" width="4" height="4" fill="#1d1d1f"/>
+
+                        <rect x="72" y="72" width="4" height="4" fill="#1d1d1f"/>
+                        <rect x="80" y="76" width="4" height="4" fill="#1d1d1f"/>
+                        <rect x="88" y="80" width="4" height="4" fill="#1d1d1f"/>
+                        <rect x="96" y="72" width="4" height="4" fill="#1d1d1f"/>
+                        <rect x="76" y="88" width="4" height="4" fill="#1d1d1f"/>
+                        <rect x="84" y="92" width="4" height="4" fill="#1d1d1f"/>
+                        <rect x="92" y="84" width="4" height="4" fill="#1d1d1f"/>
+                    </svg>
+                </div>
+                <div class="ticket-instructions">
+                    <h4>入場時のご案内</h4>
+                    <ul>
+                        <li>このチケットを印刷、またはスマートフォンでご提示ください</li>
+                        <li>QRコードを受付でスキャンして入場確認を行います</li>
+                        <li>本人確認のため、身分証明書をご持参ください</li>
+                        <li>チケットの譲渡・転売は固くお断りいたします</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="ticket-footer">
+            主催: 一般社団法人 日本翻訳連盟 (JTF) ｜ https://www.jtf.jp/<br>
+            本チケットに関するお問い合わせ: info@jtf.jp
+        </div>
+    </div>
+
+</body>
+</html>
