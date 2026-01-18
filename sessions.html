@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>セッション・登壇者一覧 | 第35回 JTF翻訳祭 2026</title>
+
+    <!-- Google Fonts: Noto Sans JP for Japanese, Inter for English -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Noto+Sans+JP:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* Base Styles */
+        body {
+            font-family: 'Inter', 'Noto Sans JP', sans-serif;
+            background-color: #f5f5f7;
+            color: #1d1d1f;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Apple-style Typography helpers */
+        .text-gradient {
+            background: linear-gradient(135deg, #1d1d1f 0%, #434344 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .text-gradient-blue {
+            background: linear-gradient(135deg, #0071e3 0%, #42a1ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Animations */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Delay utilities for staggered animations */
+        .delay-100 { transition-delay: 0.1s; }
+        .delay-200 { transition-delay: 0.2s; }
+        .delay-300 { transition-delay: 0.3s; }
+        .delay-400 { transition-delay: 0.4s; }
+        .delay-500 { transition-delay: 0.5s; }
+
+        /* Smooth Scroll */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Speaker Card */
+        .speaker-card {
+            background: white;
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            cursor: pointer;
+        }
+
+        .speaker-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.12);
+        }
+
+        .speaker-card:hover .speaker-image {
+            transform: scale(1.05);
+        }
+
+        .speaker-card:hover .speaker-overlay {
+            opacity: 1;
+        }
+
+        .speaker-image {
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .speaker-overlay {
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        /* Dynamic Background Orb */
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.5;
+            z-index: -1;
+            animation: float 20s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+            100% { transform: translate(0, 0) scale(1); }
+        }
+
+        /* Navbar Blur */
+        .nav-blur {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        /* Filter Button */
+        .filter-btn {
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn.active {
+            background: #1d1d1f;
+            color: white;
+        }
+
+        .filter-btn:not(.active):hover {
+            background: #e5e5e7;
+        }
+
+        /* Modal */
+        .modal-backdrop {
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-backdrop.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            transform: scale(0.95) translateY(20px);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .modal-backdrop.active .modal-content {
+            transform: scale(1) translateY(0);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Dynamic Background Orbs -->
+    <div class="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-[-1]">
+        <div class="orb bg-blue-200 w-[400px] h-[400px] top-[10%] left-[-100px]"></div>
+        <div class="orb bg-purple-200 w-[350px] h-[350px] bottom-[20%] right-[-50px]" style="animation-delay: -7s;"></div>
+        <div class="orb bg-gray-200 w-[300px] h-[300px] top-[60%] left-[40%]" style="animation-delay: -12s;"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 nav-blur transition-all duration-300" id="navbar">
+        <div class="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
+            <a href="index.html" class="text-sm font-semibold tracking-wide hover:opacity-70 transition-opacity">JTF Translation Festival</a>
+            <div class="hidden md:flex space-x-8 text-xs font-medium text-gray-600">
+                <a href="index.html#concept" class="hover:text-black transition-colors">コンセプト</a>
+                <a href="sessions.html" class="text-black font-semibold">セッション</a>
+                <a href="index.html#news" class="hover:text-black transition-colors">お知らせ</a>
+                <a href="index.html#archive" class="hover:text-black transition-colors">アーカイブ</a>
+                <a href="index.html#contact" class="hover:text-black transition-colors">お問い合わせ</a>
+            </div>
+            <div class="md:hidden">
+                <button class="text-gray-800"><i class="fas fa-bars"></i></button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="pt-32 pb-16 px-6 text-center">
+        <div class="max-w-4xl mx-auto reveal">
+            <p class="text-sm font-semibold text-blue-600 mb-4 tracking-wider uppercase">Sessions & Speakers</p>
+            <h1 class="text-4xl md:text-6xl font-black tracking-tighter leading-tight mb-6 text-gradient">
+                登壇者紹介
+            </h1>
+            <p class="text-lg md:text-xl text-gray-500 font-medium max-w-2xl mx-auto leading-relaxed reveal delay-100">
+                第35回翻訳祭を彩る、業界のリーダーたち。
+            </p>
+        </div>
+    </header>
+
+    <!-- Filter Section -->
+    <section class="px-6 max-w-7xl mx-auto mb-12">
+        <div class="flex flex-wrap justify-center gap-3 reveal delay-200">
+            <button class="filter-btn active px-5 py-2 rounded-full text-sm font-medium" data-filter="all">
+                すべて
+            </button>
+            <button class="filter-btn px-5 py-2 rounded-full text-sm font-medium bg-gray-100" data-filter="keynote">
+                基調講演
+            </button>
+            <button class="filter-btn px-5 py-2 rounded-full text-sm font-medium bg-gray-100" data-filter="panel">
+                パネル
+            </button>
+            <button class="filter-btn px-5 py-2 rounded-full text-sm font-medium bg-gray-100" data-filter="workshop">
+                ワークショップ
+            </button>
+            <button class="filter-btn px-5 py-2 rounded-full text-sm font-medium bg-gray-100" data-filter="ai">
+                AI・テクノロジー
+            </button>
+        </div>
+    </section>
+
+    <!-- Speakers Grid -->
+    <section class="px-6 max-w-7xl mx-auto pb-20">
+        <div id="speakers-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <!-- Speaker cards will be populated by JavaScript -->
+        </div>
+    </section>
+
+    <!-- Call to Action -->
+    <section class="py-20 px-6 text-center border-t border-gray-200">
+        <div class="max-w-2xl mx-auto reveal">
+            <h2 class="text-2xl md:text-4xl font-bold mb-6 tracking-tight">登壇者募集中</h2>
+            <p class="text-gray-500 mb-8">
+                あなたの知見を共有しませんか？<br>
+                登壇者の応募を受け付けています。
+            </p>
+            <a href="#" class="inline-flex items-center bg-[#0071e3] text-white px-8 py-3 rounded-full font-medium text-sm hover:bg-[#0077ed] transition-colors shadow-lg shadow-blue-500/30">
+                登壇に応募する <i class="fas fa-arrow-right ml-2 text-xs"></i>
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-[#1d1d1f] text-white py-12 px-6">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center text-xs text-gray-500">
+            <p>&copy; 2026 Japan Translation Federation. All rights reserved.</p>
+            <div class="flex gap-4 mt-4 md:mt-0">
+                <a href="index.html" class="hover:text-white transition-colors">ホーム</a>
+                <a href="#" class="hover:text-white transition-colors">プライバシーポリシー</a>
+                <a href="#" class="hover:text-white transition-colors">利用規約</a>
+                <a href="index.html#contact" class="hover:text-white transition-colors">お問い合わせ</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Speaker Modal -->
+    <div id="speaker-modal" class="modal-backdrop fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60">
+        <div class="modal-content bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="relative">
+                <button id="modal-close" class="absolute top-4 right-4 w-10 h-10 bg-black/10 hover:bg-black/20 rounded-full flex items-center justify-center transition-colors z-10">
+                    <i class="fas fa-times text-gray-700"></i>
+                </button>
+                <div id="modal-content-inner" class="p-8">
+                    <!-- Modal content will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        // --- Sample Speaker Data ---
+        const speakers = [
+            {
+                id: 1,
+                name: "山田 太郎",
+                nameEn: "Taro Yamada",
+                title: "株式会社トランスリンク 代表取締役",
+                photo: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face",
+                sessionTitle: "AIと共存する翻訳者のキャリア戦略",
+                category: "keynote",
+                categoryLabel: "基調講演",
+                description: "20年以上の翻訳業界経験を持ち、テクノロジーと人間の協働について研究。生成AI時代における翻訳者の新しい役割と価値創造について語ります。"
+            },
+            {
+                id: 2,
+                name: "Sarah Johnson",
+                nameEn: "Sarah Johnson",
+                title: "Global Localization Director, TechCorp",
+                photo: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&h=400&fit=crop&crop=face",
+                sessionTitle: "グローバル企業のローカライゼーション戦略",
+                category: "keynote",
+                categoryLabel: "基調講演",
+                description: "Fortune 500企業でのローカライゼーション戦略を15年間リード。多言語展開とブランド一貫性の両立について、実践的な知見を共有します。"
+            },
+            {
+                id: 3,
+                name: "鈴木 美咲",
+                nameEn: "Misaki Suzuki",
+                title: "フリーランス医薬翻訳者",
+                photo: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=400&fit=crop&crop=face",
+                sessionTitle: "医薬翻訳における品質管理の最前線",
+                category: "workshop",
+                categoryLabel: "ワークショップ",
+                description: "医薬品の承認申請書類翻訳のスペシャリスト。規制要件を満たしながら効率的に高品質な翻訳を提供するためのワークフローを解説します。"
+            },
+            {
+                id: 4,
+                name: "Michael Chen",
+                nameEn: "Michael Chen",
+                title: "AI Research Lead, LanguageAI Inc.",
+                photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face",
+                sessionTitle: "大規模言語モデルと翻訳の未来",
+                category: "ai",
+                categoryLabel: "AI・テクノロジー",
+                description: "最先端のNLP研究者として、GPTやその他のLLMが翻訳業界に与える影響と、今後5年間の技術トレンドを予測します。"
+            },
+            {
+                id: 5,
+                name: "田中 健一",
+                nameEn: "Kenichi Tanaka",
+                title: "特許翻訳事務所 所長",
+                photo: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=400&fit=crop&crop=face",
+                sessionTitle: "特許翻訳のクオリティコントロール",
+                category: "workshop",
+                categoryLabel: "ワークショップ",
+                description: "30年以上の特許翻訳経験を活かし、技術文書の正確性と法的要件を両立させる手法について、具体的な事例とともに解説します。"
+            },
+            {
+                id: 6,
+                name: "Emma Williams",
+                nameEn: "Emma Williams",
+                title: "Literary Translator & Author",
+                photo: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&h=400&fit=crop&crop=face",
+                sessionTitle: "文学翻訳における創造性と忠実性",
+                category: "panel",
+                categoryLabel: "パネル",
+                description: "数々の文学賞を受賞した翻訳者として、原作の魂を守りながら新しい言語で作品を生まれ変わらせる芸術について語ります。"
+            },
+            {
+                id: 7,
+                name: "佐藤 由美",
+                nameEn: "Yumi Sato",
+                title: "映像翻訳家・字幕監修",
+                photo: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop&crop=face",
+                sessionTitle: "ストリーミング時代の映像翻訳",
+                category: "panel",
+                categoryLabel: "パネル",
+                description: "Netflix、Amazon Primeなどの主要プラットフォームで活躍。デジタル時代における字幕・吹替翻訳の変化と対応策を議論します。"
+            },
+            {
+                id: 8,
+                name: "David Kim",
+                nameEn: "David Kim",
+                title: "CTO, TranslationTech Startup",
+                photo: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400&h=400&fit=crop&crop=face",
+                sessionTitle: "機械翻訳APIの実践的活用法",
+                category: "ai",
+                categoryLabel: "AI・テクノロジー",
+                description: "翻訳テクノロジー企業の技術責任者として、MT APIを業務に統合するためのベストプラクティスとピットフォールを共有します。"
+            }
+        ];
+
+        // --- Render Speaker Cards ---
+        const renderSpeakers = (filter = 'all') => {
+            const grid = document.getElementById('speakers-grid');
+            const filtered = filter === 'all'
+                ? speakers
+                : speakers.filter(s => s.category === filter);
+
+            grid.innerHTML = '';
+
+            filtered.forEach((speaker, index) => {
+                const card = document.createElement('div');
+                card.className = `speaker-card rounded-3xl overflow-hidden reveal delay-${(index % 5) * 100}`;
+                card.dataset.id = speaker.id;
+
+                let categoryColor = 'bg-gray-100 text-gray-600';
+                if (speaker.category === 'keynote') categoryColor = 'bg-red-100 text-red-600';
+                if (speaker.category === 'panel') categoryColor = 'bg-purple-100 text-purple-600';
+                if (speaker.category === 'workshop') categoryColor = 'bg-green-100 text-green-600';
+                if (speaker.category === 'ai') categoryColor = 'bg-blue-100 text-blue-600';
+
+                card.innerHTML = `
+                    <div class="relative aspect-square overflow-hidden bg-gray-100">
+                        <img src="${speaker.photo}" alt="${speaker.name}" class="speaker-image w-full h-full object-cover">
+                        <div class="speaker-overlay absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent flex items-end p-6">
+                            <span class="text-white text-sm font-medium">${speaker.sessionTitle}</span>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <span class="inline-block text-xs px-3 py-1 rounded-full font-medium mb-3 ${categoryColor}">${speaker.categoryLabel}</span>
+                        <h3 class="text-lg font-bold mb-1">${speaker.name}</h3>
+                        <p class="text-sm text-gray-500 mb-3">${speaker.title}</p>
+                        <p class="text-sm text-gray-700 font-medium line-clamp-2">${speaker.sessionTitle}</p>
+                    </div>
+                `;
+
+                card.addEventListener('click', () => openModal(speaker));
+                grid.appendChild(card);
+            });
+
+            // Re-observe for animations
+            document.querySelectorAll('.reveal:not(.active)').forEach(el => {
+                observer.observe(el);
+            });
+        };
+
+        // --- Modal Functions ---
+        const modal = document.getElementById('speaker-modal');
+        const modalInner = document.getElementById('modal-content-inner');
+        const modalClose = document.getElementById('modal-close');
+
+        const openModal = (speaker) => {
+            let categoryColor = 'bg-gray-100 text-gray-600';
+            if (speaker.category === 'keynote') categoryColor = 'bg-red-100 text-red-600';
+            if (speaker.category === 'panel') categoryColor = 'bg-purple-100 text-purple-600';
+            if (speaker.category === 'workshop') categoryColor = 'bg-green-100 text-green-600';
+            if (speaker.category === 'ai') categoryColor = 'bg-blue-100 text-blue-600';
+
+            modalInner.innerHTML = `
+                <div class="flex flex-col md:flex-row gap-8">
+                    <div class="w-full md:w-1/3 flex-shrink-0">
+                        <img src="${speaker.photo}" alt="${speaker.name}" class="w-full aspect-square object-cover rounded-2xl">
+                    </div>
+                    <div class="flex-grow">
+                        <span class="inline-block text-xs px-3 py-1 rounded-full font-medium mb-4 ${categoryColor}">${speaker.categoryLabel}</span>
+                        <h2 class="text-2xl md:text-3xl font-bold mb-2">${speaker.name}</h2>
+                        <p class="text-gray-500 mb-6">${speaker.title}</p>
+                        <div class="bg-gray-50 rounded-2xl p-6 mb-6">
+                            <p class="text-xs text-gray-400 uppercase font-semibold mb-2">講演タイトル</p>
+                            <h3 class="text-lg font-bold text-gray-900">${speaker.sessionTitle}</h3>
+                        </div>
+                        <p class="text-gray-600 leading-relaxed">${speaker.description}</p>
+                    </div>
+                </div>
+            `;
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        };
+
+        const closeModal = () => {
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+        };
+
+        modalClose.addEventListener('click', closeModal);
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeModal();
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+
+        // --- Filter Logic ---
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                filterBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                renderSpeakers(btn.dataset.filter);
+            });
+        });
+
+        // --- Animation Observer ---
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: "0px 0px -50px 0px"
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.reveal').forEach(el => {
+            observer.observe(el);
+        });
+
+        // --- Parallax Orbs ---
+        document.addEventListener('mousemove', (e) => {
+            const orbs = document.querySelectorAll('.orb');
+            const x = e.clientX / window.innerWidth;
+            const y = e.clientY / window.innerHeight;
+
+            orbs.forEach((orb, index) => {
+                const speed = (index + 1) * 15;
+                orb.style.transform = `translate(${x * speed}px, ${y * speed}px)`;
+            });
+        });
+
+        // --- Initialize ---
+        document.addEventListener('DOMContentLoaded', () => {
+            renderSpeakers();
+        });
+    </script>
+</body>
+</html>
