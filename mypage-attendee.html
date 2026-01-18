@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>マイページ（参加者） | 第35回 JTF翻訳祭 2026</title>
+
+    <!-- Google Fonts: Noto Sans JP for Japanese, Inter for English -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Noto+Sans+JP:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* Base Styles */
+        body {
+            font-family: 'Inter', 'Noto Sans JP', sans-serif;
+            background-color: #f5f5f7;
+            color: #1d1d1f;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Animations */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .delay-100 { transition-delay: 0.1s; }
+        .delay-200 { transition-delay: 0.2s; }
+        .delay-300 { transition-delay: 0.3s; }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Dynamic Background Orb */
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.5;
+            z-index: -1;
+            animation: float 20s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+            100% { transform: translate(0, 0) scale(1); }
+        }
+
+        /* Navbar Blur */
+        .nav-blur {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        /* Card Styles */
+        .info-card {
+            background: white;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .info-card:hover {
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+        }
+
+        /* Status Badge */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-badge.success {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        /* Action Button */
+        .action-btn {
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+
+        /* User Avatar */
+        .user-avatar {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: 700;
+            color: white;
+        }
+
+        /* Ticket Type Badge */
+        .ticket-type-badge {
+            background: linear-gradient(135deg, #0071e3 0%, #42a1ff 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Invited By Card */
+        .invited-by {
+            background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
+            border: 1px solid #bbf7d0;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Dynamic Background Orbs -->
+    <div class="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-[-1]">
+        <div class="orb bg-green-200 w-[400px] h-[400px] top-[10%] left-[-100px]"></div>
+        <div class="orb bg-teal-200 w-[350px] h-[350px] bottom-[20%] right-[-50px]" style="animation-delay: -7s;"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 nav-blur transition-all duration-300" id="navbar">
+        <div class="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
+            <a href="index.html" class="text-sm font-semibold tracking-wide hover:opacity-70 transition-opacity">JTF Translation Festival</a>
+            <div class="hidden md:flex space-x-8 text-xs font-medium text-gray-600">
+                <a href="index.html#concept" class="hover:text-black transition-colors">コンセプト</a>
+                <a href="sessions.html" class="hover:text-black transition-colors">セッション</a>
+                <a href="ticket.html" class="hover:text-black transition-colors">チケット</a>
+                <a href="index.html#news" class="hover:text-black transition-colors">お知らせ</a>
+                <a href="date-venue.html" class="hover:text-black transition-colors">日程・会場</a>
+                <a href="mypage-attendee.html" class="text-black font-semibold">マイページ</a>
+            </div>
+            <div class="md:hidden">
+                <button class="text-gray-800"><i class="fas fa-bars"></i></button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="pt-24 pb-20 px-6">
+        <div class="max-w-3xl mx-auto">
+
+            <!-- User Header -->
+            <div class="info-card rounded-3xl p-8 mb-8 reveal">
+                <div class="flex flex-col md:flex-row items-center md:items-start gap-6">
+                    <div class="user-avatar">
+                        山
+                    </div>
+                    <div class="flex-grow text-center md:text-left">
+                        <p class="text-sm text-gray-400 mb-1">参加者アカウント</p>
+                        <h1 class="text-2xl md:text-3xl font-bold mb-2">山田花子 さん</h1>
+                        <p class="text-gray-500 text-sm">hanako.yamada@example.com</p>
+                    </div>
+                    <div class="flex flex-col items-center md:items-end gap-2">
+                        <span class="ticket-type-badge">Full Package</span>
+                        <p class="text-xs text-gray-400">会場・交流パーティー参加＆オンデマンド視聴</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Invited By Info -->
+            <div class="invited-by rounded-2xl p-4 mb-8 reveal delay-100">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-gift text-green-600"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">このチケットは <strong class="text-gray-900">テスト太郎</strong> さんから招待されました</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ticket Section -->
+            <h2 class="text-xl font-bold mb-4 reveal delay-100">
+                <i class="fas fa-ticket-alt text-green-500 mr-2"></i>あなたのチケット
+            </h2>
+            <div class="info-card rounded-3xl p-8 mb-8 reveal delay-100">
+                <div class="grid md:grid-cols-2 gap-6 mb-8">
+                    <div>
+                        <p class="text-xs text-gray-400 uppercase font-semibold mb-1">チケット番号</p>
+                        <p class="text-lg font-semibold font-mono">JTF2026-00001235</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-400 uppercase font-semibold mb-1">ステータス</p>
+                        <span class="status-badge success">
+                            <i class="fas fa-check-circle"></i>有効
+                        </span>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-400 uppercase font-semibold mb-1">開催日</p>
+                        <p class="text-lg font-semibold">2026年11月13日（金）</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-400 uppercase font-semibold mb-1">会場</p>
+                        <p class="text-lg font-semibold">ロイヤルホール横浜</p>
+                    </div>
+                </div>
+
+                <div class="border-t border-gray-100 pt-6">
+                    <p class="text-sm text-gray-500 mb-4">
+                        <i class="fas fa-info-circle text-green-500 mr-2"></i>
+                        会場入場時にこのチケットを印刷またはスマートフォンで提示してください。
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <a href="ticket-pdf.html" target="_blank" class="action-btn inline-flex items-center justify-center gap-2 bg-green-600 text-white px-6 py-3 rounded-full font-semibold text-sm hover:bg-green-700">
+                            <i class="fas fa-file-pdf"></i>チケットを表示・印刷
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- On-demand Section -->
+            <h2 class="text-xl font-bold mb-4 reveal delay-200">
+                <i class="fas fa-play-circle text-purple-500 mr-2"></i>オンデマンド視聴
+            </h2>
+            <div class="info-card rounded-3xl p-8 mb-8 reveal delay-200">
+                <div class="flex flex-col md:flex-row items-start gap-6">
+                    <div class="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-video text-2xl text-purple-600"></i>
+                    </div>
+                    <div class="flex-grow">
+                        <h3 class="text-lg font-bold mb-2">OneStream 視聴プラットフォーム</h3>
+                        <p class="text-gray-500 text-sm mb-4">
+                            オンデマンド配信はOneStreamで視聴いただけます。<br>
+                            初めてご利用の方は、下記リンクからユーザー登録を行ってください。
+                        </p>
+                        <div class="bg-gray-50 rounded-xl p-4 mb-4">
+                            <p class="text-xs text-gray-400 mb-2">視聴可能期間</p>
+                            <p class="font-semibold">2026年11月1日 〜 2026年12月31日</p>
+                        </div>
+                        <a href="https://one-stream.io/join/user/d95d7e69-8b0a-418e-bf5e-dcff65e35aa6" target="_blank" rel="noopener noreferrer" class="action-btn inline-flex items-center justify-center gap-2 bg-purple-600 text-white px-6 py-3 rounded-full font-semibold text-sm hover:bg-purple-700">
+                            <i class="fas fa-external-link-alt"></i>OneStreamにログイン・登録
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Party Section -->
+            <h2 class="text-xl font-bold mb-4 reveal delay-300">
+                <i class="fas fa-glass-cheers text-yellow-500 mr-2"></i>交流パーティー
+            </h2>
+            <div class="info-card rounded-3xl p-8 reveal delay-300">
+                <div class="flex flex-col md:flex-row items-start gap-6">
+                    <div class="w-16 h-16 bg-yellow-100 rounded-2xl flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-users text-2xl text-yellow-600"></i>
+                    </div>
+                    <div class="flex-grow">
+                        <h3 class="text-lg font-bold mb-2">交流パーティー参加権</h3>
+                        <p class="text-gray-500 text-sm mb-4">
+                            会場セミナー終了後に開催される交流パーティーにご参加いただけます。
+                        </p>
+                        <div class="grid sm:grid-cols-2 gap-4">
+                            <div class="bg-gray-50 rounded-xl p-4">
+                                <p class="text-xs text-gray-400 mb-1">日時</p>
+                                <p class="font-semibold">2026年11月13日 18:00〜20:00</p>
+                            </div>
+                            <div class="bg-gray-50 rounded-xl p-4">
+                                <p class="text-xs text-gray-400 mb-1">会場</p>
+                                <p class="font-semibold">Coming Soon</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Account Settings Link -->
+            <div class="mt-12 text-center reveal delay-300">
+                <p class="text-sm text-gray-400 mb-4">アカウント設定やお問い合わせは</p>
+                <div class="flex flex-wrap justify-center gap-4">
+                    <a href="#" class="text-sm text-gray-600 hover:text-black transition-colors">
+                        <i class="fas fa-cog mr-1"></i>アカウント設定
+                    </a>
+                    <span class="text-gray-300">|</span>
+                    <a href="#" class="text-sm text-gray-600 hover:text-black transition-colors">
+                        <i class="fas fa-question-circle mr-1"></i>よくある質問
+                    </a>
+                    <span class="text-gray-300">|</span>
+                    <a href="index.html#contact" class="text-sm text-gray-600 hover:text-black transition-colors">
+                        <i class="fas fa-envelope mr-1"></i>お問い合わせ
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-[#1d1d1f] text-white py-12 px-6">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center text-xs text-gray-500">
+            <p>&copy; 2026 Japan Translation Federation. All rights reserved.</p>
+            <div class="flex gap-4 mt-4 md:mt-0">
+                <a href="index.html" class="hover:text-white transition-colors">ホーム</a>
+                <a href="#" class="hover:text-white transition-colors">プライバシーポリシー</a>
+                <a href="#" class="hover:text-white transition-colors">利用規約</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        // --- Animation Observer ---
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: "0px 0px -50px 0px"
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.reveal').forEach(el => {
+            observer.observe(el);
+        });
+
+        // --- Parallax Orbs ---
+        document.addEventListener('mousemove', (e) => {
+            const orbs = document.querySelectorAll('.orb');
+            const x = e.clientX / window.innerWidth;
+            const y = e.clientY / window.innerHeight;
+
+            orbs.forEach((orb, index) => {
+                const speed = (index + 1) * 15;
+                orb.style.transform = `translate(${x * speed}px, ${y * speed}px)`;
+            });
+        });
+    </script>
+</body>
+</html>

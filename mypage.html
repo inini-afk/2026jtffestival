@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>マイページ | 第35回 JTF翻訳祭 2026</title>
+    <title>マイページ（申込者） | 第35回 JTF翻訳祭 2026</title>
 
     <!-- Google Fonts: Noto Sans JP for Japanese, Inter for English -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -102,6 +102,16 @@
             color: #92400e;
         }
 
+        .status-badge.invited {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-badge.unassigned {
+            background: #f3f4f6;
+            color: #6b7280;
+        }
+
         /* Action Button */
         .action-btn {
             transition: all 0.3s ease;
@@ -126,16 +136,70 @@
             color: white;
         }
 
-        /* Ticket Type Badge */
-        .ticket-type-badge {
-            background: linear-gradient(135deg, #0071e3 0%, #42a1ff 100%);
-            color: white;
-            padding: 4px 12px;
-            border-radius: 6px;
-            font-size: 11px;
+        .user-avatar-small {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
             font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            color: white;
+        }
+
+        /* Ticket Card */
+        .ticket-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 20px;
+            padding: 24px;
+            transition: all 0.3s ease;
+        }
+
+        .ticket-card:hover {
+            border-color: #d1d5db;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+        }
+
+        .ticket-card.self {
+            border-color: #0071e3;
+            background: linear-gradient(135deg, #f0f7ff 0%, #ffffff 100%);
+        }
+
+        /* Modal */
+        .modal-backdrop {
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-backdrop.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            transform: scale(0.95) translateY(20px);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .modal-backdrop.active .modal-content {
+            transform: scale(1) translateY(0);
+        }
+
+        /* Copy Button */
+        .copy-btn {
+            transition: all 0.2s ease;
+        }
+
+        .copy-btn:hover {
+            background: #e5e7eb;
+        }
+
+        .copy-btn.copied {
+            background: #dcfce7;
+            color: #166534;
         }
     </style>
 </head>
@@ -176,31 +240,31 @@
                         テ
                     </div>
                     <div class="flex-grow text-center md:text-left">
-                        <p class="text-sm text-gray-400 mb-1">ようこそ</p>
+                        <p class="text-sm text-gray-400 mb-1">申込者アカウント</p>
                         <h1 class="text-2xl md:text-3xl font-bold mb-2">テスト太郎 さん</h1>
                         <p class="text-gray-500 text-sm">test.taro@example.com</p>
                     </div>
-                    <div class="flex flex-col items-center md:items-end gap-2">
-                        <span class="ticket-type-badge">Full Package</span>
-                        <p class="text-xs text-gray-400">会場・交流パーティー参加＆オンデマンド視聴</p>
+                    <div class="text-center md:text-right">
+                        <p class="text-xs text-gray-400 mb-1">注文番号</p>
+                        <p class="font-mono font-semibold text-sm">ORD-2026-00001234</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Ticket Section -->
-            <h2 class="text-xl font-bold mb-4 reveal delay-100">
-                <i class="fas fa-ticket-alt text-blue-500 mr-2"></i>会場チケット
-            </h2>
+            <!-- Order Summary -->
             <div class="info-card rounded-3xl p-8 mb-8 reveal delay-100">
-                <div class="grid md:grid-cols-2 gap-6 mb-8">
+                <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
+                    <i class="fas fa-receipt text-blue-500"></i>注文情報
+                </h2>
+                <div class="grid md:grid-cols-4 gap-6">
                     <div>
                         <p class="text-xs text-gray-400 uppercase font-semibold mb-1">購入日</p>
-                        <p class="text-lg font-semibold">2026年7月15日</p>
+                        <p class="font-semibold">2026年7月15日</p>
                     </div>
                     <div>
                         <p class="text-xs text-gray-400 uppercase font-semibold mb-1">決済方法</p>
-                        <p class="text-lg font-semibold">
-                            <i class="fab fa-cc-visa text-blue-600 mr-2"></i>クレジットカード
+                        <p class="font-semibold">
+                            <i class="fab fa-cc-visa text-blue-600 mr-1"></i>クレジットカード
                         </p>
                     </div>
                     <div>
@@ -210,32 +274,106 @@
                         </span>
                     </div>
                     <div>
-                        <p class="text-xs text-gray-400 uppercase font-semibold mb-1">チケット番号</p>
-                        <p class="text-lg font-semibold font-mono">JTF2026-00001234</p>
-                    </div>
-                </div>
-
-                <div class="border-t border-gray-100 pt-6">
-                    <p class="text-sm text-gray-500 mb-4">
-                        <i class="fas fa-info-circle text-blue-500 mr-2"></i>
-                        会場入場時にこのチケットを印刷またはスマートフォンで提示してください。
-                    </p>
-                    <div class="flex flex-col sm:flex-row gap-4">
-                        <a href="ticket-pdf.html" target="_blank" class="action-btn inline-flex items-center justify-center gap-2 bg-[#0071e3] text-white px-6 py-3 rounded-full font-semibold text-sm">
-                            <i class="fas fa-file-pdf"></i>チケットを表示・印刷
-                        </a>
-                        <button onclick="downloadTicket()" class="action-btn inline-flex items-center justify-center gap-2 bg-gray-900 text-white px-6 py-3 rounded-full font-semibold text-sm">
-                            <i class="fas fa-download"></i>PDFダウンロード
-                        </button>
+                        <p class="text-xs text-gray-400 uppercase font-semibold mb-1">購入チケット数</p>
+                        <p class="font-semibold">3枚</p>
                     </div>
                 </div>
             </div>
 
-            <!-- On-demand Section -->
+            <!-- Tickets Management -->
             <h2 class="text-xl font-bold mb-4 reveal delay-200">
+                <i class="fas fa-tickets-alt text-blue-500 mr-2"></i>チケット管理
+                <span class="text-sm font-normal text-gray-400 ml-2">（3枚）</span>
+            </h2>
+
+            <div class="space-y-4 mb-8">
+
+                <!-- Ticket 1: Self (Registered) -->
+                <div class="ticket-card self reveal delay-200">
+                    <div class="flex flex-col md:flex-row md:items-center gap-4">
+                        <div class="flex items-center gap-4 flex-grow">
+                            <div class="user-avatar-small bg-gradient-to-br from-blue-500 to-purple-600">
+                                テ
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="font-bold">テスト太郎</span>
+                                    <span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">自分</span>
+                                </div>
+                                <p class="text-sm text-gray-500">test.taro@example.com</p>
+                                <p class="text-xs text-gray-400 font-mono mt-1">JTF2026-00001234</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="status-badge success">
+                                <i class="fas fa-check-circle"></i>登録完了
+                            </span>
+                            <a href="ticket-pdf.html" target="_blank" class="action-btn bg-[#0071e3] text-white px-4 py-2 rounded-full text-sm font-semibold">
+                                <i class="fas fa-ticket-alt mr-1"></i>チケット
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ticket 2: Invited -->
+                <div class="ticket-card reveal delay-200">
+                    <div class="flex flex-col md:flex-row md:items-center gap-4">
+                        <div class="flex items-center gap-4 flex-grow">
+                            <div class="user-avatar-small bg-gradient-to-br from-green-500 to-teal-600">
+                                山
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="font-bold">山田花子</span>
+                                </div>
+                                <p class="text-sm text-gray-500">hanako.yamada@example.com</p>
+                                <p class="text-xs text-gray-400 font-mono mt-1">JTF2026-00001235</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="status-badge invited">
+                                <i class="fas fa-paper-plane"></i>招待済み
+                            </span>
+                            <button onclick="resendInvite('hanako.yamada@example.com')" class="text-sm text-gray-500 hover:text-gray-700">
+                                <i class="fas fa-redo mr-1"></i>再送信
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ticket 3: Unassigned -->
+                <div class="ticket-card reveal delay-300">
+                    <div class="flex flex-col md:flex-row md:items-center gap-4">
+                        <div class="flex items-center gap-4 flex-grow">
+                            <div class="user-avatar-small bg-gray-300">
+                                <i class="fas fa-user-plus text-gray-500"></i>
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="font-bold text-gray-400">未割当</span>
+                                </div>
+                                <p class="text-sm text-gray-400">参加者を招待してください</p>
+                                <p class="text-xs text-gray-400 font-mono mt-1">JTF2026-00001236</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="status-badge unassigned">
+                                <i class="fas fa-clock"></i>未割当
+                            </span>
+                            <button onclick="openAssignModal('JTF2026-00001236')" class="action-btn bg-gray-900 text-white px-4 py-2 rounded-full text-sm font-semibold">
+                                <i class="fas fa-user-plus mr-1"></i>招待する
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- On-demand Section -->
+            <h2 class="text-xl font-bold mb-4 reveal delay-300">
                 <i class="fas fa-play-circle text-purple-500 mr-2"></i>オンデマンド視聴
             </h2>
-            <div class="info-card rounded-3xl p-8 mb-8 reveal delay-200">
+            <div class="info-card rounded-3xl p-8 mb-8 reveal delay-300">
                 <div class="flex flex-col md:flex-row items-start gap-6">
                     <div class="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center flex-shrink-0">
                         <i class="fas fa-video text-2xl text-purple-600"></i>
@@ -244,7 +382,7 @@
                         <h3 class="text-lg font-bold mb-2">OneStream 視聴プラットフォーム</h3>
                         <p class="text-gray-500 text-sm mb-4">
                             オンデマンド配信はOneStreamで視聴いただけます。<br>
-                            初めてご利用の方は、下記リンクからユーザー登録を行ってください。
+                            <span class="text-yellow-600"><i class="fas fa-exclamation-triangle mr-1"></i>各参加者が個別にOneStreamで登録する必要があります。</span>
                         </p>
                         <div class="bg-gray-50 rounded-xl p-4 mb-4">
                             <p class="text-xs text-gray-400 mb-2">視聴可能期間</p>
@@ -257,32 +395,16 @@
                 </div>
             </div>
 
-            <!-- Party Section -->
-            <h2 class="text-xl font-bold mb-4 reveal delay-300">
-                <i class="fas fa-glass-cheers text-yellow-500 mr-2"></i>交流パーティー
-            </h2>
-            <div class="info-card rounded-3xl p-8 reveal delay-300">
-                <div class="flex flex-col md:flex-row items-start gap-6">
-                    <div class="w-16 h-16 bg-yellow-100 rounded-2xl flex items-center justify-center flex-shrink-0">
-                        <i class="fas fa-users text-2xl text-yellow-600"></i>
-                    </div>
-                    <div class="flex-grow">
-                        <h3 class="text-lg font-bold mb-2">交流パーティー参加権</h3>
-                        <p class="text-gray-500 text-sm mb-4">
-                            会場セミナー終了後に開催される交流パーティーにご参加いただけます。
-                        </p>
-                        <div class="grid sm:grid-cols-2 gap-4">
-                            <div class="bg-gray-50 rounded-xl p-4">
-                                <p class="text-xs text-gray-400 mb-1">日時</p>
-                                <p class="font-semibold">2026年11月13日 18:00〜20:00</p>
-                            </div>
-                            <div class="bg-gray-50 rounded-xl p-4">
-                                <p class="text-xs text-gray-400 mb-1">会場</p>
-                                <p class="font-semibold">Coming Soon</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <!-- Help Section -->
+            <div class="bg-blue-50 rounded-2xl p-6 reveal delay-300">
+                <h3 class="font-bold mb-3 flex items-center gap-2">
+                    <i class="fas fa-question-circle text-blue-500"></i>チケット割当について
+                </h3>
+                <ul class="text-sm text-gray-600 space-y-2">
+                    <li><i class="fas fa-check text-green-500 mr-2"></i><strong>登録完了</strong>：参加者がアカウント作成を完了し、チケットを受け取りました</li>
+                    <li><i class="fas fa-paper-plane text-blue-500 mr-2"></i><strong>招待済み</strong>：招待メールを送信済み。参加者のアカウント作成待ちです</li>
+                    <li><i class="fas fa-clock text-gray-400 mr-2"></i><strong>未割当</strong>：参加者の情報を入力して招待してください</li>
+                </ul>
             </div>
 
             <!-- Account Settings Link -->
@@ -305,6 +427,60 @@
 
         </div>
     </main>
+
+    <!-- Assign Modal -->
+    <div id="assign-modal" class="modal-backdrop fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60">
+        <div class="modal-content bg-white rounded-3xl max-w-md w-full overflow-hidden">
+            <div class="p-8">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-xl font-bold">参加者を招待</h3>
+                    <button onclick="closeAssignModal()" class="w-10 h-10 rounded-full hover:bg-gray-100 flex items-center justify-center">
+                        <i class="fas fa-times text-gray-500"></i>
+                    </button>
+                </div>
+
+                <p class="text-sm text-gray-500 mb-6">
+                    参加者のメールアドレスを入力してください。<br>
+                    招待リンクが記載されたメールが送信されます。
+                </p>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-semibold mb-2">参加者の名前</label>
+                        <input type="text" id="attendee-name" placeholder="例：田中一郎" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold mb-2">メールアドレス</label>
+                        <input type="email" id="attendee-email" placeholder="例：ichiro@example.com" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all">
+                    </div>
+                </div>
+
+                <div class="mt-6 p-4 bg-gray-50 rounded-xl">
+                    <p class="text-xs text-gray-400 mb-2">チケット番号</p>
+                    <p class="font-mono font-semibold" id="modal-ticket-id">JTF2026-00001236</p>
+                </div>
+
+                <div class="mt-6 flex gap-3">
+                    <button onclick="closeAssignModal()" class="flex-1 px-6 py-3 rounded-full border border-gray-200 font-semibold text-sm hover:bg-gray-50 transition-colors">
+                        キャンセル
+                    </button>
+                    <button onclick="sendInvite()" class="flex-1 px-6 py-3 rounded-full bg-[#0071e3] text-white font-semibold text-sm hover:bg-[#0077ed] transition-colors">
+                        <i class="fas fa-paper-plane mr-2"></i>招待を送信
+                    </button>
+                </div>
+
+                <div class="mt-6 pt-6 border-t border-gray-100">
+                    <p class="text-xs text-gray-400 mb-3">または、招待リンクを直接共有：</p>
+                    <div class="flex gap-2">
+                        <input type="text" readonly value="https://jtf2026.jp/invite/abc123xyz" class="flex-1 px-4 py-2 rounded-lg bg-gray-100 text-sm font-mono text-gray-600">
+                        <button onclick="copyInviteLink(this)" class="copy-btn px-4 py-2 rounded-lg bg-gray-100 text-sm font-semibold">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Footer -->
     <footer class="bg-[#1d1d1f] text-white py-12 px-6">
@@ -351,9 +527,60 @@
             });
         });
 
-        // --- Download Ticket (Demo) ---
-        function downloadTicket() {
-            alert('デモサイトのためダウンロード機能はありません。\n「チケットを表示・印刷」からブラウザの印刷機能でPDF保存できます。');
+        // --- Modal Functions ---
+        const modal = document.getElementById('assign-modal');
+        let currentTicketId = '';
+
+        function openAssignModal(ticketId) {
+            currentTicketId = ticketId;
+            document.getElementById('modal-ticket-id').textContent = ticketId;
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeAssignModal() {
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+            document.getElementById('attendee-name').value = '';
+            document.getElementById('attendee-email').value = '';
+        }
+
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeAssignModal();
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeAssignModal();
+        });
+
+        // --- Invite Functions ---
+        function sendInvite() {
+            const name = document.getElementById('attendee-name').value;
+            const email = document.getElementById('attendee-email').value;
+
+            if (!name || !email) {
+                alert('名前とメールアドレスを入力してください');
+                return;
+            }
+
+            alert(`デモサイトのため実際には送信されません。\n\n以下の内容で招待メールを送信します：\n・参加者名: ${name}\n・メールアドレス: ${email}\n・チケット番号: ${currentTicketId}`);
+            closeAssignModal();
+        }
+
+        function resendInvite(email) {
+            alert(`デモサイトのため実際には送信されません。\n\n${email} に招待メールを再送信します。`);
+        }
+
+        function copyInviteLink(btn) {
+            const input = btn.previousElementSibling;
+            navigator.clipboard.writeText(input.value).then(() => {
+                btn.innerHTML = '<i class="fas fa-check"></i>';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.innerHTML = '<i class="fas fa-copy"></i>';
+                    btn.classList.remove('copied');
+                }, 2000);
+            });
         }
     </script>
 </body>
