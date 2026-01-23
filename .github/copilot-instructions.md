@@ -1,111 +1,160 @@
-# JTF Translation Festival 2026 - AI Coding Agent Instructions
+# Copilot Instructions - JTF Translation Festival 2026 Teaser Site
 
 ## Project Overview
 
-**JTF翻訳祭2026（第35回JTF Translation Festival）** - A teaser/promotional website for Japan's largest translation conference. Multi-page static HTML site with Apple-inspired modern design, built with **zero build tools** (pure HTML, CSS, and vanilla JavaScript).
+**JTF翻訳祭2026** (35th Japan Translation Federation Festival) teaser website. A lightweight, single-page / multi-page static site using vanilla HTML + CSS + JavaScript.
 
-**Key trait**: Single-page `index.html` plus dedicated pages (`sessions.html`, `ticket.html`, `mypage.html`, `ticket-pdf.html`) all self-contained with embedded CSS/JS. No frameworks, no bundlers.
+- **Architecture**: No build tools. Vanilla HTML/CSS/JS with CDN dependencies
+- **CSS Framework**: Tailwind CSS (CDN)
+- **Content Management**: MicroCMS (optional via Fetch API)
+- **Design System**: Apple-inspired minimalist aesthetic with smooth animations
 
-## Architecture Patterns
+## File Structure
 
-### Page Structure
-- **index.html**: Landing page with hero, concept, features (Bento Grid), news section, footer with newsletter signup
-- **sessions.html**: Sessions & speakers directory with category filtering (keynote, panel, workshop, AI)
-- **ticket.html**: Ticket purchase interface with pricing tiers and PDFs
-- **mypage.html**: User dashboard (placeholder for future auth/ticket management)
-- All pages share: Tailwind CSS, Google Fonts (Inter + Noto Sans JP), FontAwesome icons, custom `.reveal` animations
-
-### Styling Architecture
-- **Tailwind CDN**: `<script src="https://cdn.tailwindcss.com"></script>` - no build config
-- **Custom CSS** in `<style>` block includes:
-  - `.reveal`: Intersection Observer scroll animations (opacity + translateY, cubic-bezier easing)
-  - `.text-gradient` / `.text-gradient-blue`: Gradient text effects
-  - `.orb`: Parallax animated background orbs (mousemove + CSS animation)
-  - `.bento-card`: Hover shadow effects
-  - `.nav-blur`: Navbar backdrop blur on scroll
-  - `.delay-*`: Staggered animation delays (100, 200, etc. classes)
-
-### JavaScript Patterns
-1. **Intersection Observer**: Detect `.reveal` elements in viewport → add `.active` class → apply CSS transitions
-2. **Parallax orbs**: Track `mousemove` events, apply `transform: translate()` based on client X/Y position
-3. **Navbar scroll listener**: Add/remove shadow class at scroll threshold (50px)
-4. **Event delegation**: Filter buttons use `data-filter` attributes for session filtering
-
-## CMS Integration (MicroCMS via Fetch API)
-
-### Configuration
-Located in `index.html` lines ~354-357:
-```javascript
-const CMS_CONFIG = {
-    serviceDomain: 'YOUR_DOMAIN',  // e.g., 'my-translation-fest'
-    apiKey: 'YOUR_API_KEY',        // e.g., 'xxxx-xxxx-xxxx-xxxx'
-};
+```
+.
+├── index.html           # Main landing page (hero, concept, features, news, footer)
+├── sessions.html        # Speaker/session listings (Bento grid layout)
+├── mypage.html          # User profile/registration page
+├── ticket.html          # Ticket display/generation
+├── ticket-pdf.html      # PDF-friendly ticket template
+└── CLAUDE.md            # Existing AI instructions (reference)
 ```
 
-### Fetch Pattern
-- **Endpoint**: `https://{serviceDomain}.microcms.io/api/v1/news?limit=3`
-- **Header**: `X-MICROCMS-API-KEY: {apiKey}`
-- **Fallback**: If config uses defaults ("YOUR_DOMAIN" / "YOUR_API_KEY"), displays hardcoded `dummyNews` array
-- **Error handling**: Catches HTTP errors, displays dummy data if fetch fails
+## Core Patterns & Architecture
 
-### News Rendering
-- `renderNews(contents)` function processes API response
-- Formats dates using `toLocaleDateString('ja-JP')`
-- Applies category badges: '重要' (red), 'イベント' (blue), default (gray)
-- Cards populate `#news-container` DOM element
+### 1. **Scroll Animation Pattern** (Intersection Observer)
+All `.reveal` elements fade in with a 30px upward translateY on scroll:
+- Defined in `<style>`: `.reveal { opacity: 0; transform: translateY(30px); }`
+- Activated by `observer.unobserve()` when `.isIntersecting`
+- **Stagger delays**: `.delay-100/.delay-200/.delay-300` for sequential animations
+- **Example**: `<div class="reveal delay-100">...</div>`
+- **Why this pattern?**: Smooth, performant entrance animations without heavy libraries
 
-## Bilingual Typography Strategy
+### 2. **CSS Architecture** (Embedded `<style>` Tag)
+- No external CSS file; everything in `<style>` tag within each HTML
+- Custom utilities for animations, gradients, and effects
+- Tailwind CSS handles layout/spacing/colors
+- **Pattern example**:
+  ```css
+  .bento-card {
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
+  }
+  .bento-card:hover {
+      transform: scale(1.02);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+  }
+  ```
 
-- **Japanese text**: Noto Sans JP (weights 300-900)
-- **English text**: Inter (weights 300-800)
-- **Font loading**: Preconnect + display=swap for performance
-- **Selector convention**: Use `lang="ja"` or language-specific classes if language-aware styling needed (currently implicit)
+### 3. **Parallax Orb Background**
+- Positioned `.orb` elements animate on `mousemove`
+- Moves based on cursor position with multiplied speed offsets per orb
+- Creates depth illusion without expensive rendering
+- **Code**: `document.addEventListener('mousemove', ...)` multiplies `e.clientX/Y` by speed indices
+
+### 4. **MicroCMS Integration** (Fetch API)
+- No SDK; uses native Fetch API for better reliability
+- Config object at top of script: `CMS_CONFIG = { serviceDomain, apiKey }`
+- **Fallback behavior**: If API keys are defaults ("YOUR_DOMAIN"/"YOUR_API_KEY"), renders dummy data
+- Endpoint: `https://${serviceDomain}.microcms.io/api/v1/news?limit=3`
+- **Error handling**: Gracefully falls back to dummy news on fetch failure
+- **Why Fetch?**: Simpler, smaller footprint than SDK; easier to debug
+
+### 5. **Navbar Blur Effect**
+- Navbar gets `.shadow-sm` class when `scrollY > 50`
+- Uses `backdrop-filter: blur(20px)` for glass effect
+- Smooth transition for visual polish
+
+### 6. **Bento Grid Layout** (`sessions.html`)
+- `grid grid-cols-1 md:grid-cols-3 md:grid-rows-2` with custom height constraints
+- Large featured card spans 2 columns/rows on desktop
+- Cards use `.speaker-card` with hover scale + shadow effects
+- **Speaker overlay**: Hidden by default, revealed on hover with opacity transition
 
 ## Development Workflow
 
-### Local Testing
+### No Build Step Required
+Open any `.html` file in a browser directly, or serve via:
 ```bash
-# Python simple server (common choice)
 python -m http.server 8000
-# Then open: http://localhost:8000
-
-# Or use any static server:
-# Node: npx http-server
-# VS Code: Live Server extension
 ```
 
-### No Build Step
-- Edit `.html` directly in IDE
-- Changes live-reload with browser refresh
-- CSS/JS embedded = no external asset compilation
+### Testing CDN Resources
+- **Fonts** (Google Fonts): Preconnect + crossorigin
+- **Tailwind**: Script tag from CDN
+- **FontAwesome**: CDN link for icons
+- Ensure internet connectivity; CDN resources won't cache locally
 
-### Common Tasks
-1. **Add new section**: Copy existing `.reveal` structure with animation delay classes
-2. **Modify CMS**: Update `CMS_CONFIG` object, refresh browser to test Fetch API
-3. **Adjust animations**: Tweak `.reveal` transition duration, parallax orb speed multiplier in JS
-4. **Update nav links**: Maintain consistent anchor references across all 4 HTML pages
+### Making Content Changes
+1. Edit text/structure in `.html` directly
+2. Keep animation classes (`.reveal`, `.delay-*`) intact
+3. Use Tailwind utility classes for responsive breakpoints
+4. Test responsiveness: mobile first, then tablet (`md:`), then desktop
 
-## Code Style Conventions
+### CMS Content Updates
+- Modify `CMS_CONFIG` credentials to point to live MicroCMS instance
+- API responses must contain `contents` array with `{ title, description, publishedAt, url? }`
+- Dummy data defined in `dummyNews` variable serves as fallback/reference
 
-- **Indentation**: 4-space tabs (consistent across HTML files)
-- **Naming**: camelCase for JS variables/functions, kebab-case for CSS classes
-- **Selectors**: Use data attributes for JS filtering (`data-filter="keynote"`)
-- **Comments**: Mark major sections with `// --- 1. Animation Logic ---` style headers
-- **Responsive breakpoints**: Use Tailwind's `md:` and `lg:` prefixes (mobile-first)
-- **Color palette**: Gray (`#1d1d1f`, `#434344`), Blue (`#0071e3`, `#42a1ff`), with light backgrounds (`#f5f5f7`)
+## Key Design Decisions
 
-## Important Notes for AI Agents
+| Decision | Rationale |
+|----------|-----------|
+| No build tools | Simplicity, fast iteration, immediate browser preview |
+| Embedded CSS | Single-file dependency per page; no external stylesheet management |
+| Fetch API over SDK | Lower bundle footprint; native browser API; easier debugging |
+| Bento grid + cards | Modern, scannable layout; aligns with Apple/modern design trends |
+| IntersectionObserver | Performant scroll animations; doesn't block main thread |
+| Parallax orbs | Subtle depth; mouse-driven interactivity; lightweight CPU usage |
 
-1. **Preserve cross-page consistency**: Updates to nav, fonts, colors, animations should sync across all `.html` files
-2. **Test dummy CMS mode**: Verify `dummyNews` displays correctly before configuring real MicroCMS credentials
-3. **Mobile-first approach**: Always include `hidden md:flex` / `md:` utilities when adapting layouts
-4. **No external state**: Each page is independent—use session/local storage if cross-page data needed
-5. **Accessibility**: Maintain semantic HTML (`<nav>`, `<section>`, `<header>`), use FontAwesome icons with `<i>` tags (not for critical content)
+## Common Tasks
 
-## Key Files Reference
+### Adding a New Section
+1. Create semantic HTML (`<section id="name">`)
+2. Wrap content in `.max-w-7xl mx-auto` for layout consistency
+3. Add `.reveal` classes to elements for entrance animation
+4. Use Tailwind for spacing: `py-20 px-6` (padding), `mb-16` (margins)
+5. Apply custom animations in `<style>` if needed
 
-- [index.html](index.html) - Landing page + CMS logic
-- [sessions.html](sessions.html) - Sessions/speaker directory
-- [ticket.html](ticket.html) - Pricing & ticketing
-- [mypage.html](mypage.html) - User dashboard (stub)
-- [CLAUDE.md](CLAUDE.md) - Human-friendly project guide
+### Updating News/Content
+- Edit `dummyNews` array structure in JavaScript
+- Ensure shape matches MicroCMS API response (`title`, `description`, `publishedAt`, `url`)
+- Test with DevTools Network tab to verify API calls
+
+### Responsive Design
+- **Mobile-first approach**: Default styles apply to mobile
+- **Breakpoints**: `md:` for tablet/desktop
+- **Example**: `grid grid-cols-1 md:grid-cols-3` (1 column mobile, 3 columns medium+)
+- Always test at 375px (mobile), 768px (tablet), 1200px+ (desktop)
+
+### Styling Hierarchy
+1. Tailwind utility classes (layout, spacing, basic colors)
+2. Custom `.reveal` / animation classes (in `<style>`)
+3. Hover/interactive states (component-specific in `<style>`)
+
+## Debugging Tips
+
+- **Animation lag?** Check `.reveal` transition timing; adjust `rootMargin` in IntersectionObserver
+- **Parallax not moving?** Verify `.orb` elements exist in DOM and have absolute positioning
+- **CMS fetch failing?** Check console for API key errors; verify `Access-Control-Allow-Origin` headers
+- **Responsive issues?** Inspect in DevTools device emulation; check Tailwind breakpoint prefixes
+- **Performance?** Use DevTools Performance tab; watch for repaints during scroll/mouse movement
+
+## External Dependencies
+
+| Resource | Purpose | Fallback |
+|----------|---------|----------|
+| Google Fonts (Inter, Noto Sans JP) | Typography | System fonts if CDN unavailable |
+| Tailwind CSS CDN | Layout/spacing/utilities | Manual CSS if needed |
+| FontAwesome 6.4.0 | Icons | Text labels if icons fail |
+| MicroCMS API | News content | Dummy data baked into JS |
+
+## Notes for AI Agents
+
+- **Don't** add build tools or preprocessors without explicit request
+- **Do** preserve `.reveal` animation class patterns when refactoring
+- **Do** test responsive breakpoints (`md:`) after layout changes
+- **Do** maintain fallback logic (dummy data) in MicroCMS integration
+- **Don't** move CSS out of `<style>` tags without architectural discussion
+- **Prefer** native APIs (Fetch, IntersectionObserver) over polyfills/libraries
+
