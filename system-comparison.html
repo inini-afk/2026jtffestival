@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>配信システム比較検討 | JTF翻訳祭 2026</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Noto+Sans+JP:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Mermaid -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans JP', sans-serif;
+            background-color: #f5f5f7;
+            color: #1d1d1f;
+        }
+        .nav-blur {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        .card { background: white; border-radius: 1.5rem; }
+        .card-red { border-left: 4px solid #ef4444; }
+        .card-yellow { border-left: 4px solid #f59e0b; }
+        .card-green { border-left: 4px solid #22c55e; }
+        .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
+        .badge-red { background: #fef2f2; color: #dc2626; }
+        .badge-yellow { background: #fffbeb; color: #d97706; }
+        .badge-green { background: #f0fdf4; color: #16a34a; }
+        .mermaid { background: white; padding: 1rem; border-radius: 1rem; }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 nav-blur">
+        <div class="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
+            <a href="index.html" class="text-sm font-semibold tracking-wide hover:opacity-70 transition-opacity">JTF Translation Festival</a>
+            <div class="hidden md:flex space-x-8 text-xs font-medium text-gray-600">
+                <a href="index.html" class="hover:text-black transition-colors">トップ</a>
+                <a href="sessions.html" class="hover:text-black transition-colors">セッション</a>
+                <a href="ticket.html" class="hover:text-black transition-colors">チケット</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <header class="pt-24 pb-12 px-6 text-center">
+        <p class="text-sm font-semibold text-blue-600 mb-2 uppercase tracking-wider">Internal Document</p>
+        <h1 class="text-4xl md:text-5xl font-bold tracking-tight mb-4">配信システム比較検討</h1>
+        <p class="text-gray-500 max-w-2xl mx-auto">チケット申込 × オンデマンド配信システムの3案を比較</p>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-6 pb-20">
+
+        <!-- 3案サマリー -->
+        <section class="grid md:grid-cols-3 gap-6 mb-16">
+
+            <!-- 案1 -->
+            <div class="card card-red p-6 shadow-sm">
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="badge badge-red">現行</span>
+                    <span class="text-2xl font-bold">案1</span>
+                </div>
+                <h3 class="text-xl font-bold mb-2">EventRegist + Enavle</h3>
+                <p class="text-gray-500 text-sm mb-4">統合型（同一ベンダー）</p>
+
+                <div class="space-y-2 text-sm">
+                    <div class="flex justify-between"><span class="text-gray-500">初期費用</span><span class="font-semibold text-red-600">55万円〜</span></div>
+                    <div class="flex justify-between"><span class="text-gray-500">決済手数料</span><span>8%</span></div>
+                    <div class="flex justify-between"><span class="text-gray-500">請求書払い</span><span class="text-green-600">対応</span></div>
+                    <div class="flex justify-between"><span class="text-gray-500">代理視聴登録</span><span class="text-red-600 font-semibold">不可</span></div>
+                </div>
+
+                <div class="mt-4 p-3 bg-red-50 rounded-lg text-xs text-red-700">
+                    <i class="fas fa-exclamation-triangle mr-1"></i>
+                    Enavle海外サーバーのため、各参加者が本人登録必須
+                </div>
+            </div>
+
+            <!-- 案2 -->
+            <div class="card card-yellow p-6 shadow-sm">
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="badge badge-yellow">低コスト</span>
+                    <span class="text-2xl font-bold">案2</span>
+                </div>
+                <h3 class="text-xl font-bold mb-2">Peatix + OneStream</h3>
+                <p class="text-gray-500 text-sm mb-4">分離型（別サービス）</p>
+
+                <div class="space-y-2 text-sm">
+                    <div class="flex justify-between"><span class="text-gray-500">初期費用</span><span class="font-semibold text-green-600">ほぼ無料</span></div>
+                    <div class="flex justify-between"><span class="text-gray-500">決済手数料</span><span>約5%</span></div>
+                    <div class="flex justify-between"><span class="text-gray-500">請求書払い</span><span class="text-red-600">非対応</span></div>
+                    <div class="flex justify-between"><span class="text-gray-500">代理視聴登録</span><span class="text-yellow-600">手動対応</span></div>
+                </div>
+
+                <div class="mt-4 p-3 bg-yellow-50 rounded-lg text-xs text-yellow-700">
+                    <i class="fas fa-hand-paper mr-1"></i>
+                    事務局の手動作業が多い（情報収集・アカウント登録）
+                </div>
+            </div>
+
+            <!-- 案3 -->
+            <div class="card card-green p-6 shadow-sm">
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="badge badge-green">推奨</span>
+                    <span class="text-2xl font-bold">案3</span>
+                </div>
+                <h3 class="text-xl font-bold mb-2">CMS + 内製</h3>
+                <p class="text-gray-500 text-sm mb-4">WordPress/microCMS + Cloudflare Stream</p>
+
+                <div class="space-y-2 text-sm">
+                    <div class="flex justify-between"><span class="text-gray-500">初期費用</span><span>開発費依存</span></div>
+                    <div class="flex justify-between"><span class="text-gray-500">決済手数料</span><span class="font-semibold text-green-600">3.6%（Stripe）</span></div>
+                    <div class="flex justify-between"><span class="text-gray-500">請求書払い</span><span class="text-green-600">実装可能</span></div>
+                    <div class="flex justify-between"><span class="text-gray-500">代理視聴登録</span><span class="text-green-600 font-semibold">自動化可能</span></div>
+                </div>
+
+                <div class="mt-4 p-3 bg-green-50 rounded-lg text-xs text-green-700">
+                    <i class="fas fa-check-circle mr-1"></i>
+                    申込→視聴までシームレス。長期的にコスト最小
+                </div>
+            </div>
+        </section>
+
+        <!-- 事務局コメント -->
+        <section class="card p-8 shadow-sm mb-16 border-l-4 border-red-500">
+            <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
+                <i class="fas fa-comment-dots text-red-500"></i>
+                事務局コメント（運用実績）
+            </h2>
+            <div class="bg-red-50 p-6 rounded-xl">
+                <p class="text-gray-700 mb-4">
+                    <strong>過去数年間、案1（EventRegist + Enavle）を採用して運用してきた結果：</strong>
+                </p>
+                <ul class="space-y-2 text-sm text-gray-600">
+                    <li class="flex items-start gap-2">
+                        <i class="fas fa-times-circle text-red-500 mt-1"></i>
+                        <span><strong>Enavleプレーヤーの評判が悪い</strong> - 参加者から不満・クレームが発生</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <i class="fas fa-times-circle text-red-500 mt-1"></i>
+                        <span><strong>改善要望が反映されない</strong> - 複数回フィードバックしても目立った改善なし</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <i class="fas fa-times-circle text-red-500 mt-1"></i>
+                        <span><strong>高額なコストに見合う価値か疑問</strong> - 55万円〜/イベント</span>
+                    </li>
+                </ul>
+                <p class="mt-4 font-semibold text-red-700">
+                    → システムの見直しを検討する時期に来ている
+                </p>
+            </div>
+        </section>
+
+        <!-- フロー図 -->
+        <section class="mb-16">
+            <h2 class="text-2xl font-bold mb-6 text-center">ロール別フロー比較</h2>
+
+            <div class="grid md:grid-cols-1 gap-8">
+
+                <!-- 案1フロー -->
+                <div class="card p-6 shadow-sm">
+                    <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                        <span class="badge badge-red">案1</span> EventRegist + Enavle
+                    </h3>
+                    <div class="mermaid">
+sequenceDiagram
+    participant 申込者
+    participant 参加者
+    participant EventRegist
+    participant Enavle
+
+    申込者->>EventRegist: チケット申込（複数枚可）
+    EventRegist->>参加者: PDFチケット送信
+
+    rect rgb(255, 230, 230)
+        Note over 参加者,Enavle: ⚠️ ここが問題
+        参加者->>Enavle: 本人が直接登録（必須）
+    end
+
+    参加者->>Enavle: オンデマンド視聴
+                    </div>
+                </div>
+
+                <!-- 案3フロー -->
+                <div class="card p-6 shadow-sm">
+                    <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                        <span class="badge badge-green">案3</span> 内製システム（理想形）
+                    </h3>
+                    <div class="mermaid">
+sequenceDiagram
+    participant 申込者
+    participant 参加者
+    participant 自社システム
+    participant Stripe
+
+    rect rgb(230, 255, 230)
+        申込者->>自社システム: チケット申込 + 参加者情報入力
+        自社システム->>Stripe: 決済処理
+        自社システム->>自社システム: アカウント自動生成
+        自社システム->>参加者: ログイン情報を自動送信
+    end
+
+    参加者->>自社システム: メールのリンクから即視聴
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 比較表 -->
+        <section class="card p-8 shadow-sm mb-16 overflow-x-auto">
+            <h2 class="text-2xl font-bold mb-6">総合比較</h2>
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="border-b">
+                        <th class="text-left py-3 px-4">評価項目</th>
+                        <th class="text-center py-3 px-4 bg-red-50">案1</th>
+                        <th class="text-center py-3 px-4 bg-yellow-50">案2</th>
+                        <th class="text-center py-3 px-4 bg-green-50">案3</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="border-b">
+                        <td class="py-3 px-4 font-medium">初期コスト</td>
+                        <td class="text-center py-3 px-4 text-red-600">✕ 高い</td>
+                        <td class="text-center py-3 px-4 text-green-600">◎ 低い</td>
+                        <td class="text-center py-3 px-4">△ 開発費</td>
+                    </tr>
+                    <tr class="border-b">
+                        <td class="py-3 px-4 font-medium">決済手数料</td>
+                        <td class="text-center py-3 px-4">8%</td>
+                        <td class="text-center py-3 px-4">約5%</td>
+                        <td class="text-center py-3 px-4 text-green-600 font-semibold">3.6%</td>
+                    </tr>
+                    <tr class="border-b">
+                        <td class="py-3 px-4 font-medium">代理申込（視聴）</td>
+                        <td class="text-center py-3 px-4 text-red-600 font-semibold">✕ 不可</td>
+                        <td class="text-center py-3 px-4 text-yellow-600">△ 手動</td>
+                        <td class="text-center py-3 px-4 text-green-600">◎ 自動</td>
+                    </tr>
+                    <tr class="border-b">
+                        <td class="py-3 px-4 font-medium">請求書払い</td>
+                        <td class="text-center py-3 px-4 text-green-600">◎</td>
+                        <td class="text-center py-3 px-4 text-red-600">✕</td>
+                        <td class="text-center py-3 px-4">○ 要実装</td>
+                    </tr>
+                    <tr class="border-b">
+                        <td class="py-3 px-4 font-medium">事務局の運用負荷</td>
+                        <td class="text-center py-3 px-4 text-yellow-600">△ 登録フォロー</td>
+                        <td class="text-center py-3 px-4 text-red-600">✕ 手動多い</td>
+                        <td class="text-center py-3 px-4 text-green-600">○ 一元管理</td>
+                    </tr>
+                    <tr class="border-b">
+                        <td class="py-3 px-4 font-medium">参加者の体験</td>
+                        <td class="text-center py-3 px-4 text-yellow-600">△ 登録が面倒</td>
+                        <td class="text-center py-3 px-4 text-yellow-600">△ 分断</td>
+                        <td class="text-center py-3 px-4 text-green-600">◎ シームレス</td>
+                    </tr>
+                    <tr>
+                        <td class="py-3 px-4 font-medium">法人利用の適合性</td>
+                        <td class="text-center py-3 px-4 text-red-600">△ 制約あり</td>
+                        <td class="text-center py-3 px-4 text-yellow-600">△ 制限あり</td>
+                        <td class="text-center py-3 px-4 text-green-600">○ 柔軟</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- 結論 -->
+        <section class="card p-8 shadow-sm bg-gradient-to-br from-green-50 to-blue-50">
+            <h2 class="text-2xl font-bold mb-6 text-center">結論</h2>
+            <div class="max-w-3xl mx-auto">
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="bg-white p-6 rounded-xl">
+                        <h3 class="font-bold text-lg mb-2 text-green-700">短期的（次回開催）</h3>
+                        <p class="text-sm text-gray-600">
+                            <strong>案2（Peatix + OneStream）</strong>で低コスト・低リスクにスタート。
+                            手動作業は発生するが、現行より参加者体験は改善。
+                        </p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl">
+                        <h3 class="font-bold text-lg mb-2 text-blue-700">中長期的（2〜3年後）</h3>
+                        <p class="text-sm text-gray-600">
+                            <strong>案3（内製）</strong>へ段階移行。
+                            決済手数料最小化、代理申込の自動化、ブランド体験の統一を実現。
+                        </p>
+                    </div>
+                </div>
+                <p class="text-center mt-6 text-gray-500 text-sm">
+                    いずれの場合も、<strong class="text-red-600">案1（現行）の継続は非推奨</strong>。<br>
+                    高コスト・低品質・改善されないという三重苦からの脱却が必要。
+                </p>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-100 py-8 px-6 text-center text-sm text-gray-500">
+        <p>&copy; 2026 JTF翻訳祭 事務局資料</p>
+        <a href="JTF翻訳祭_チケット・配信システム比較検討.md" class="text-blue-600 hover:underline mt-2 inline-block">
+            <i class="fas fa-file-alt mr-1"></i>詳細版（Markdown）を見る
+        </a>
+    </footer>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'neutral' });
+    </script>
+</body>
+</html>
