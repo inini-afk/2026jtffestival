@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>配信システム比較検討【詳細版】| JTF翻訳祭 2026</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Noto+Sans+JP:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+
+    <style>
+        body { font-family: 'Inter', 'Noto Sans JP', sans-serif; background-color: #f5f5f7; color: #1d1d1f; }
+        .nav-blur { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .card { background: white; border-radius: 1.5rem; }
+        .toc { position: sticky; top: 80px; }
+        .toc a { display: block; padding: 0.5rem 1rem; border-left: 2px solid #e5e7eb; transition: all 0.2s; }
+        .toc a:hover { border-left-color: #3b82f6; background: #f0f9ff; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid #e5e7eb; }
+        th { background: #f9fafb; font-weight: 600; }
+        .mermaid { background: #f9fafb; padding: 1rem; border-radius: 0.75rem; overflow-x: auto; }
+        .alert { padding: 1rem; border-radius: 0.75rem; margin: 1rem 0; }
+        .alert-red { background: #fef2f2; border-left: 4px solid #ef4444; }
+        .alert-yellow { background: #fffbeb; border-left: 4px solid #f59e0b; }
+        .alert-green { background: #f0fdf4; border-left: 4px solid #22c55e; }
+        .alert-blue { background: #eff6ff; border-left: 4px solid #3b82f6; }
+        code { background: #f3f4f6; padding: 0.125rem 0.375rem; border-radius: 0.25rem; font-size: 0.875rem; }
+        pre { background: #1f2937; color: #e5e7eb; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; }
+        h2 { scroll-margin-top: 80px; }
+        .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
+        .badge-red { background: #fef2f2; color: #dc2626; }
+        .badge-yellow { background: #fffbeb; color: #d97706; }
+        .badge-green { background: #f0fdf4; color: #16a34a; }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 nav-blur">
+        <div class="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
+            <a href="index.html" class="text-sm font-semibold tracking-wide hover:opacity-70">JTF Translation Festival</a>
+            <div class="hidden md:flex space-x-8 text-xs font-medium text-gray-600">
+                <a href="system-comparison.html" class="hover:text-black">概要版</a>
+                <a href="index.html" class="hover:text-black">トップ</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <header class="pt-24 pb-8 px-6 text-center">
+        <p class="text-sm font-semibold text-blue-600 mb-2 uppercase tracking-wider">Internal Document - Full Version</p>
+        <h1 class="text-3xl md:text-4xl font-bold tracking-tight mb-4">配信システム比較検討【詳細版】</h1>
+        <p class="text-gray-500">チケット申込 × オンデマンド配信システムの3案を多角的に比較検討</p>
+        <p class="text-sm text-gray-400 mt-2">作成日: 2026年1月24日</p>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-6 pb-20 flex gap-8">
+
+        <!-- Sidebar TOC -->
+        <aside class="hidden lg:block w-64 flex-shrink-0">
+            <nav class="toc text-sm">
+                <p class="font-semibold mb-3 px-4 text-gray-500">目次</p>
+                <a href="#overview">比較対象3案の概要</a>
+                <a href="#flow">ロール別フロー図</a>
+                <a href="#plan1">案1: EventRegist+Enavle</a>
+                <a href="#plan2">案2: Peatix+OneStream</a>
+                <a href="#plan3">案3: CMS+内製</a>
+                <a href="#comparison">比較一覧表</a>
+                <a href="#multi-ticket">複数枚チケット対応</a>
+                <a href="#payment">決済システム比較</a>
+                <a href="#conclusion">総合評価と推奨</a>
+                <a href="#references">参考情報源</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-grow min-w-0">
+
+            <!-- 概要 -->
+            <section id="overview" class="card p-8 shadow-sm mb-8">
+                <h2 class="text-2xl font-bold mb-6">比較対象3案の概要</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>案</th>
+                            <th>チケット申込</th>
+                            <th>オンデマンド配信</th>
+                            <th>連携方式</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="badge badge-red">案1</span></td>
+                            <td>EventRegist</td>
+                            <td>Enavle</td>
+                            <td>統合（同一ベンダー）※制約あり</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge badge-yellow">案2</span></td>
+                            <td>Peatix等</td>
+                            <td>OneStream</td>
+                            <td>分離（別サービス）</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge badge-green">案3</span></td>
+                            <td>microCMS/WordPress</td>
+                            <td>Cloudflare Stream/MUX</td>
+                            <td>内製化</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="alert alert-red mt-4">
+                    <strong>⚠️ 案1の重要な制約:</strong> Enavleは海外サーバー（シンガポール）で運用されているため、オンデマンド視聴には<strong>各参加者本人がEnavleに直接登録する必要がある</strong>。代理申込（視聴登録）は原則不可。
+                </div>
+            </section>
+
+            <!-- ロール別フロー図 -->
+            <section id="flow" class="card p-8 shadow-sm mb-8">
+                <h2 class="text-2xl font-bold mb-4">ロール別フロー図</h2>
+                <p class="text-gray-600 mb-6">以下の4つのロールで各案の運用フローを視覚化:</p>
+                <ul class="list-disc list-inside text-sm text-gray-600 mb-6 space-y-1">
+                    <li><strong>申込者</strong>: チケットを申し込む人（参加者を兼ねる場合あり、総務部等の代理申込も含む）</li>
+                    <li><strong>参加者</strong>: 実際にイベントに参加・視聴する人</li>
+                    <li><strong>事務局</strong>: 登録作業・事務作業・問い合わせ対応を行うJTFスタッフ</li>
+                    <li><strong>サービス</strong>: SaaS・サーバー等のシステム</li>
+                </ul>
+
+                <h3 class="text-lg font-bold mb-4 flex items-center gap-2"><span class="badge badge-red">案1</span> EventRegist + Enavle</h3>
+                <div class="mermaid mb-6">
+sequenceDiagram
+    autonumber
+    participant 申込者
+    participant 参加者
+    participant EventRegist
+    participant Enavle
+    participant 事務局
+
+    Note over 申込者,事務局: 【チケット申込フェーズ】
+    申込者->>EventRegist: チケット申込（複数枚可）
+    申込者->>EventRegist: 参加者情報入力
+    申込者->>EventRegist: 決済（クレジット/請求書）
+    EventRegist->>参加者: PDFチケット送信
+
+    Note over 申込者,事務局: 【視聴登録フェーズ】⚠️ここが課題
+    rect rgb(255, 230, 230)
+        参加者->>Enavle: ⚠️本人が直接アカウント登録（必須）
+    end
+    Enavle->>参加者: 視聴アカウント発行
+
+    参加者->>Enavle: オンデマンド視聴
+
+    Note over 申込者,事務局: 【問い合わせ対応】
+    参加者->>事務局: 「登録できない」「視聴できない」
+    事務局->>参加者: Enavle登録手順の案内
+                </div>
+                <p class="text-sm text-gray-600 mb-8"><strong>課題:</strong> チケット申込と視聴登録が分離、Enavle登録でつまずく参加者への対応負荷</p>
+
+                <h3 class="text-lg font-bold mb-4 flex items-center gap-2"><span class="badge badge-yellow">案2</span> Peatix + OneStream</h3>
+                <div class="mermaid mb-6">
+sequenceDiagram
+    autonumber
+    participant 申込者
+    participant 参加者
+    participant Peatix
+    participant OneStream
+    participant 事務局
+
+    申込者->>Peatix: チケット申込・決済
+    Peatix->>申込者: チケット発行
+
+    Note over 申込者,事務局: 【参加者情報収集】⚠️手動作業
+    rect rgb(255, 245, 200)
+        事務局->>事務局: Googleフォーム等で情報収集
+        参加者->>事務局: 参加者情報を入力
+    end
+
+    Note over 申込者,事務局: 【視聴権限付与】⚠️手動作業
+    rect rgb(255, 245, 200)
+        事務局->>OneStream: 参加者アカウント手動登録
+        事務局->>参加者: ログイン情報をメール送信
+    end
+
+    参加者->>OneStream: オンデマンド視聴
+                </div>
+                <p class="text-sm text-gray-600 mb-8"><strong>課題:</strong> 事務局の手動作業が多い、2つのサービス間でデータ連携がない</p>
+
+                <h3 class="text-lg font-bold mb-4 flex items-center gap-2"><span class="badge badge-green">案3</span> CMS + 内製（理想形）</h3>
+                <div class="mermaid mb-6">
+sequenceDiagram
+    autonumber
+    participant 申込者
+    participant 参加者
+    participant 自社システム
+    participant Stripe
+    participant 事務局
+
+    Note over 申込者,事務局: 【チケット申込】シームレス
+    rect rgb(230, 255, 230)
+        申込者->>自社システム: チケット申込 + 各参加者情報入力
+        自社システム->>Stripe: 決済処理
+        自社システム->>自社システム: 参加者アカウント自動生成
+        自社システム->>参加者: ログイン情報を自動送信
+    end
+
+    参加者->>自社システム: メールのリンクから即視聴
+
+    Note over 申込者,事務局: 【問い合わせ対応】
+    参加者->>事務局: 問い合わせ
+    事務局->>自社システム: 管理画面で全情報を一元確認
+                </div>
+                <p class="text-sm text-gray-600"><strong>メリット:</strong> 申込→視聴までシームレス、全データを自社管理画面で一元確認</p>
+            </section>
+
+            <!-- 案1詳細 -->
+            <section id="plan1" class="card p-8 shadow-sm mb-8">
+                <h2 class="text-2xl font-bold mb-2 flex items-center gap-3">
+                    <span class="badge badge-red">現行</span>
+                    案1: EventRegist + Enavle（統合型）
+                </h2>
+
+                <h3 class="text-lg font-semibold mt-6 mb-3">サービス概要</h3>
+                <ul class="list-disc list-inside text-gray-600 space-y-1">
+                    <li><strong>EventRegist</strong>: 国内大手イベント管理プラットフォーム（5万団体以上が利用）</li>
+                    <li><strong>Enavle</strong>: シンガポール Actioport社開発のバーチャルイベントプラットフォーム</li>
+                </ul>
+
+                <h3 class="text-lg font-semibold mt-6 mb-3">料金体系</h3>
+                <table class="text-sm">
+                    <tr><th>項目</th><th>金額</th></tr>
+                    <tr><td>EventRegist基本機能</td><td>無料</td></tr>
+                    <tr><td>有料チケット決済手数料</td><td class="text-red-600 font-semibold">販売額の8%</td></tr>
+                    <tr><td>Premium機能（enavle連携含む）</td><td class="text-red-600 font-semibold">550,000円〜/イベント</td></tr>
+                    <tr><td>連携サービス利用費</td><td>申込人数により変動</td></tr>
+                </table>
+
+                <h3 class="text-lg font-semibold mt-6 mb-3">メリット</h3>
+                <div class="grid md:grid-cols-2 gap-4 text-sm">
+                    <div>
+                        <p class="font-medium text-gray-700 mb-2">運用面</p>
+                        <ul class="list-disc list-inside text-gray-600 space-y-1">
+                            <li>チケット販売〜視聴管理まで一元化</li>
+                            <li>視聴履歴の自動連携</li>
+                            <li>問い合わせ窓口の一本化</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <p class="font-medium text-gray-700 mb-2">機能面</p>
+                        <ul class="list-disc list-inside text-gray-600 space-y-1">
+                            <li>YouTube/Zoom等と連携可能</li>
+                            <li>セッション毎のアンケート機能</li>
+                            <li>スポンサー広告動画配信</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3 class="text-lg font-semibold mt-6 mb-3">デメリット</h3>
+                <ul class="list-disc list-inside text-gray-600 space-y-1 text-sm">
+                    <li><strong>高額な初期費用</strong>: Premium機能利用に55万円〜/イベント</li>
+                    <li><strong>人数連動コスト</strong>: 大規模イベントでは費用が増大</li>
+                    <li>Enavle独自のUIに依存（カスタマイズ制限）</li>
+                    <li>ベンダーロックイン（他サービスへの移行が困難）</li>
+                </ul>
+
+                <div class="alert alert-red mt-6">
+                    <h4 class="font-bold mb-2">⚠️ 重要な制約：Enavleの海外サーバー問題</h4>
+                    <ul class="list-disc list-inside text-sm space-y-1">
+                        <li>Enavleはシンガポールの海外サーバーで運用</li>
+                        <li><strong>代理申込が原則不可</strong>: 視聴者本人がEnavleに直接アカウント登録する必要がある</li>
+                        <li>総務部が社員分を一括申込しても、各視聴者が個別にEnavle登録が必要</li>
+                        <li>法人の代理購入ユースケースとの相性が悪い</li>
+                    </ul>
+                </div>
+
+                <!-- 事務局コメント -->
+                <div class="mt-8 p-6 bg-red-50 rounded-xl border border-red-200">
+                    <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
+                        <i class="fas fa-comment-dots text-red-500"></i>
+                        事務局コメント（数年間の運用実績に基づく評価）
+                    </h3>
+                    <p class="text-gray-700 mb-4 text-sm">
+                        JTF翻訳祭では過去数年間、案1（EventRegist + Enavle）を採用して運用してきた実績がある。以下は、その運用経験から得られた課題・所感である。
+                    </p>
+                    <div class="grid md:grid-cols-2 gap-4 text-sm">
+                        <div>
+                            <p class="font-semibold text-red-700 mb-2">Enavleプレーヤーの問題点</p>
+                            <ul class="space-y-1 text-gray-700">
+                                <li><i class="fas fa-times-circle text-red-500 mr-1"></i>視聴プレーヤーの評判が悪い</li>
+                                <li><i class="fas fa-times-circle text-red-500 mr-1"></i>UIや操作性に課題あり</li>
+                                <li><i class="fas fa-times-circle text-red-500 mr-1"></i>再生品質・安定性への懸念</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-red-700 mb-2">ベンダー対応の問題点</p>
+                            <ul class="space-y-1 text-gray-700">
+                                <li><i class="fas fa-times-circle text-red-500 mr-1"></i>フィードバックが改善に反映されない</li>
+                                <li><i class="fas fa-times-circle text-red-500 mr-1"></i>複数回要望しても目立った改善なし</li>
+                                <li><i class="fas fa-times-circle text-red-500 mr-1"></i>日本市場ニーズへの対応が不十分</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <p class="mt-4 font-bold text-red-700">
+                        → 高額なシステム利用料に見合う価値が得られているか疑問。システムの見直しを検討する時期に来ている。
+                    </p>
+                </div>
+            </section>
+
+            <!-- 案2詳細 -->
+            <section id="plan2" class="card p-8 shadow-sm mb-8">
+                <h2 class="text-2xl font-bold mb-2 flex items-center gap-3">
+                    <span class="badge badge-yellow">低コスト</span>
+                    案2: Peatix + OneStream（分離型）
+                </h2>
+
+                <h3 class="text-lg font-semibold mt-6 mb-3">サービス概要</h3>
+                <ul class="list-disc list-inside text-gray-600 space-y-1">
+                    <li><strong>Peatix</strong>: 国内最大級のイベント・チケット販売プラットフォーム</li>
+                    <li><strong>OneStream</strong>: 株式会社ルートチーム運営の動画配信サイト構築プラットフォーム</li>
+                </ul>
+
+                <h3 class="text-lg font-semibold mt-6 mb-3">料金体系</h3>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <p class="font-medium mb-2">Peatix</p>
+                        <table class="text-sm">
+                            <tr><td>初期費用・月額費用</td><td class="text-green-600 font-semibold">無料</td></tr>
+                            <tr><td>有料チケット決済手数料</td><td>4.9% + 99円/枚</td></tr>
+                            <tr><td>振込手数料</td><td>210円/イベント</td></tr>
+                        </table>
+                    </div>
+                    <div>
+                        <p class="font-medium mb-2">OneStream</p>
+                        <table class="text-sm">
+                            <tr><td>初期費用</td><td class="text-green-600 font-semibold">0円</td></tr>
+                            <tr><td>スタータープラン</td><td>9,800円〜/月</td></tr>
+                            <tr><td>エンタープライズ</td><td>要問合せ</td></tr>
+                        </table>
+                    </div>
+                </div>
+
+                <h3 class="text-lg font-semibold mt-6 mb-3">メリット</h3>
+                <ul class="list-disc list-inside text-gray-600 space-y-1 text-sm">
+                    <li><strong>低い初期投資</strong>: Peatixは基本無料、OneStreamは月額9,800円〜</li>
+                    <li><strong>導入ハードルが低い</strong>: 両サービスとも専門知識不要</li>
+                    <li><strong>サービスの独立性</strong>: 片方に問題があっても他方は継続可能</li>
+                </ul>
+
+                <h3 class="text-lg font-semibold mt-6 mb-3">デメリット</h3>
+                <ul class="list-disc list-inside text-gray-600 space-y-1 text-sm">
+                    <li><strong>手動での参加者管理が必要</strong>: チケット購入者リストとOneStream会員の紐付け作業</li>
+                    <li><strong>請求書払い非対応</strong>: 法人は別ルートでの対応が必要</li>
+                    <li><strong>導線の分断</strong>: チケット購入→視聴ページへの誘導が複雑化</li>
+                    <li>問い合わせ窓口が分散</li>
+                </ul>
+
+                <div class="alert alert-yellow">
+                    <strong>注意:</strong> Peatixは請求書払い非対応。法人からの一括購入には別途対応が必要。
+                </div>
+            </section>
+
+            <!-- 案3詳細 -->
+            <section id="plan3" class="card p-8 shadow-sm mb-8">
+                <h2 class="text-2xl font-bold mb-2 flex items-center gap-3">
+                    <span class="badge badge-green">推奨</span>
+                    案3: CMS + ストリーミングサービス（内製化）
+                </h2>
+
+                <h3 class="text-lg font-semibold mt-6 mb-3">サービス概要</h3>
+                <ul class="list-disc list-inside text-gray-600 space-y-1">
+                    <li><strong>CMS</strong>: microCMS（国産ヘッドレスCMS）またはWordPress</li>
+                    <li><strong>動画配信</strong>: Cloudflare Stream または MUX</li>
+                    <li><strong>決済</strong>: Stripe（3.6%）</li>
+                </ul>
+
+                <h3 class="text-lg font-semibold mt-6 mb-3">料金体系</h3>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <p class="font-medium mb-2">microCMS</p>
+                        <table class="text-sm">
+                            <tr><td>Hobby</td><td>無料</td></tr>
+                            <tr><td>Team</td><td>4,900円/月</td></tr>
+                            <tr><td>Business</td><td>31,900円/月</td></tr>
+                        </table>
+                    </div>
+                    <div>
+                        <p class="font-medium mb-2">Cloudflare Stream</p>
+                        <table class="text-sm">
+                            <tr><td>動画保存</td><td>$5/1,000分/月</td></tr>
+                            <tr><td>動画配信</td><td>$1/1,000分視聴</td></tr>
+                        </table>
+                    </div>
+                </div>
+
+                <h3 class="text-lg font-semibold mt-6 mb-3">メリット</h3>
+                <div class="grid md:grid-cols-2 gap-4 text-sm">
+                    <div>
+                        <p class="font-medium text-gray-700 mb-2">カスタマイズ性</p>
+                        <ul class="list-disc list-inside text-gray-600 space-y-1">
+                            <li>JTFブランドに合わせた独自デザイン</li>
+                            <li>必要な機能だけを実装</li>
+                            <li>API経由で任意のサービスと接続</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <p class="font-medium text-gray-700 mb-2">コスト面</p>
+                        <ul class="list-disc list-inside text-gray-600 space-y-1">
+                            <li>決済手数料3.6%（Stripe）</li>
+                            <li>従量課金で初期投資を抑制</li>
+                            <li>大規模になるほど相対的に安価</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <p class="font-medium text-gray-700 mb-2">データ管理</p>
+                        <ul class="list-disc list-inside text-gray-600 space-y-1">
+                            <li>参加者データを完全管理</li>
+                            <li>任意の指標でデータ分析可能</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <p class="font-medium text-gray-700 mb-2">長期的視点</p>
+                        <ul class="list-disc list-inside text-gray-600 space-y-1">
+                            <li>翌年以降も再利用可能</li>
+                            <li>内部にノウハウ蓄積</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3 class="text-lg font-semibold mt-6 mb-3">デメリット</h3>
+                <ul class="list-disc list-inside text-gray-600 space-y-1 text-sm">
+                    <li><strong>開発リソースが必要</strong>: エンジニアまたは外部委託が必須</li>
+                    <li><strong>構築期間</strong>: 数週間〜数ヶ月の開発期間</li>
+                    <li><strong>保守・メンテナンス責任</strong>: 障害対応は自己責任</li>
+                </ul>
+
+                <h3 class="text-lg font-semibold mt-6 mb-3">推奨プラグイン構成（WordPress）</h3>
+                <ul class="list-disc list-inside text-gray-600 space-y-1 text-sm">
+                    <li><strong>FooEvents for WooCommerce</strong> ($49〜): 参加者別チケット発行、QRコード生成</li>
+                    <li><strong>Tickera</strong>: WooCommerce連携、20以上の決済ゲートウェイ対応</li>
+                    <li><strong>Event Tickets Plus</strong>: 各参加者の詳細情報収集、自動メール確認</li>
+                </ul>
+            </section>
+
+            <!-- 比較一覧表 -->
+            <section id="comparison" class="card p-8 shadow-sm mb-8 overflow-x-auto">
+                <h2 class="text-2xl font-bold mb-6">比較一覧表</h2>
+                <table class="text-sm">
+                    <thead>
+                        <tr>
+                            <th>評価項目</th>
+                            <th class="text-center bg-red-50">案1</th>
+                            <th class="text-center bg-yellow-50">案2</th>
+                            <th class="text-center bg-green-50">案3</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>初期コスト</td><td class="text-center text-red-600">✕ 高（55万円〜）</td><td class="text-center text-green-600">◎ 低（ほぼ無料）</td><td class="text-center">△ 中（開発費依存）</td></tr>
+                        <tr><td>ランニングコスト</td><td class="text-center">△ 中〜高</td><td class="text-center">○ 低〜中</td><td class="text-center text-green-600">◎ 低（従量制）</td></tr>
+                        <tr><td>決済手数料</td><td class="text-center">8%</td><td class="text-center">約5%</td><td class="text-center text-green-600 font-semibold">3.6%</td></tr>
+                        <tr><td>導入の容易さ</td><td class="text-center">○ 容易</td><td class="text-center text-green-600">◎ 非常に容易</td><td class="text-center text-red-600">✕ 開発必要</td></tr>
+                        <tr><td>代理申込（視聴）</td><td class="text-center text-red-600 font-semibold">✕ 不可</td><td class="text-center">✕ 手動対応</td><td class="text-center text-green-600">◎ 自由設計</td></tr>
+                        <tr><td>請求書払い</td><td class="text-center text-green-600">◎ 対応</td><td class="text-center text-red-600">✕ 非対応</td><td class="text-center">○ 要実装</td></tr>
+                        <tr><td>ユーザー体験</td><td class="text-center">△ Enavle登録の手間</td><td class="text-center">△ 分断</td><td class="text-center">○ 設計次第</td></tr>
+                        <tr><td>カスタマイズ性</td><td class="text-center">△ 制限あり</td><td class="text-center">△ 制限あり</td><td class="text-center text-green-600">◎ 完全自由</td></tr>
+                        <tr><td>データ管理</td><td class="text-center">△ ベンダー依存</td><td class="text-center">△ 分散管理</td><td class="text-center text-green-600">◎ 自社管理</td></tr>
+                        <tr><td>サポート体制</td><td class="text-center text-green-600">◎ 手厚い</td><td class="text-center">○ あり</td><td class="text-center text-red-600">✕ 自己対応</td></tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- 複数枚チケット -->
+            <section id="multi-ticket" class="card p-8 shadow-sm mb-8">
+                <h2 class="text-2xl font-bold mb-4">複数枚チケット購入・代理申込対応</h2>
+                <p class="text-gray-600 mb-4">JTF翻訳祭では、以下のようなユースケースが想定される：</p>
+                <ul class="list-disc list-inside text-gray-600 mb-6 text-sm">
+                    <li><strong>総務部・営業部による一括購入</strong>: 社内複数名分のチケットをまとめて購入</li>
+                    <li><strong>クライアント企業の招待</strong>: 取引先への招待チケット発行</li>
+                    <li><strong>グループ参加</strong>: チーム単位での申込</li>
+                </ul>
+
+                <table class="text-sm">
+                    <thead>
+                        <tr>
+                            <th>評価項目</th>
+                            <th class="text-center bg-red-50">案1</th>
+                            <th class="text-center bg-yellow-50">案2</th>
+                            <th class="text-center bg-green-50">案3</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>一括購入の容易さ</td><td class="text-center">◎</td><td class="text-center">○</td><td class="text-center">◎</td></tr>
+                        <tr><td>各参加者情報収集</td><td class="text-center">◎</td><td class="text-center">△（別途対応要）</td><td class="text-center">◎</td></tr>
+                        <tr><td>請求書払い対応</td><td class="text-center text-green-600">◎</td><td class="text-center text-red-600">✕</td><td class="text-center">◎</td></tr>
+                        <tr><td>代理での視聴登録</td><td class="text-center text-red-600 font-semibold">✕（Enavle制約）</td><td class="text-center">✕（手動）</td><td class="text-center text-green-600">◎</td></tr>
+                        <tr><td>視聴権限の自動付与</td><td class="text-center">△（本人登録後）</td><td class="text-center text-red-600">✕（手動）</td><td class="text-center text-green-600">◎</td></tr>
+                        <tr><td>運用負荷</td><td class="text-center">△（登録フォロー要）</td><td class="text-center">△ 高い</td><td class="text-center">○ 設計次第</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="alert alert-red mt-4">
+                    <strong>⚠️ 案1の注意点:</strong> EventRegistでのチケット購入は代理可能だが、Enavle（オンデマンド配信）の視聴登録は各参加者本人が行う必要がある。チケット購入と視聴登録が分離しているため、法人の代理購入ユースケースでは運用負荷が高くなる。
+                </div>
+            </section>
+
+            <!-- 決済システム -->
+            <section id="payment" class="card p-8 shadow-sm mb-8">
+                <h2 class="text-2xl font-bold mb-6">決済システム比較</h2>
+
+                <h3 class="text-lg font-semibold mb-3">各サービスの決済手数料</h3>
+                <table class="text-sm mb-6">
+                    <thead>
+                        <tr><th>サービス</th><th>決済手数料</th><th>対応決済方法</th><th>備考</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>EventRegist</td><td>8%</td><td>クレジット、請求書、銀行振込</td><td>請求書払いはPremium機能</td></tr>
+                        <tr><td>Peatix</td><td>4.9% + 99円/枚</td><td>クレジット、コンビニ、PayPal</td><td class="text-red-600">請求書払い非対応</td></tr>
+                        <tr><td class="font-semibold">Stripe</td><td class="text-green-600 font-semibold">3.6%</td><td>クレジット、Apple Pay、Google Pay</td><td>案3で利用可能</td></tr>
+                    </tbody>
+                </table>
+
+                <h3 class="text-lg font-semibold mb-3">決済コストシミュレーション</h3>
+                <p class="text-sm text-gray-600 mb-3">前提条件: チケット単価 5,000円、参加者 500名</p>
+                <table class="text-sm">
+                    <thead>
+                        <tr><th>項目</th><th class="text-right">案1</th><th class="text-right">案2</th><th class="text-right">案3</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>チケット売上</td><td class="text-right">2,500,000円</td><td class="text-right">2,500,000円</td><td class="text-right">2,500,000円</td></tr>
+                        <tr><td>決済手数料率</td><td class="text-right">8%</td><td class="text-right">約6.9%</td><td class="text-right text-green-600">3.6%</td></tr>
+                        <tr><td>決済手数料額</td><td class="text-right text-red-600">200,000円</td><td class="text-right">172,000円</td><td class="text-right text-green-600">90,000円</td></tr>
+                        <tr><td>システム利用料</td><td class="text-right text-red-600">550,000円〜</td><td class="text-right">117,600円</td><td class="text-right">開発費依存</td></tr>
+                        <tr class="font-semibold"><td>年間総コスト</td><td class="text-right text-red-600">750,000円〜</td><td class="text-right">289,600円</td><td class="text-right text-green-600">90,000円 + 開発費</td></tr>
+                    </tbody>
+                </table>
+                <p class="text-xs text-gray-500 mt-2">※案3は開発費（初期50〜200万円程度）を除いた運用コスト</p>
+            </section>
+
+            <!-- 総合評価 -->
+            <section id="conclusion" class="card p-8 shadow-sm mb-8">
+                <h2 class="text-2xl font-bold mb-6">総合評価と推奨シナリオ</h2>
+
+                <div class="grid md:grid-cols-3 gap-6 mb-8">
+                    <div class="p-4 border border-red-200 rounded-xl bg-red-50">
+                        <h3 class="font-bold mb-2 text-red-700">案1を推奨するケース</h3>
+                        <ul class="text-sm text-gray-700 space-y-1">
+                            <li>• 予算に余裕がある場合</li>
+                            <li>• スポンサー向け機能を重視</li>
+                            <li>• 参加者が各自でEnavle登録を許容できる場合</li>
+                        </ul>
+                        <p class="text-xs text-red-600 mt-2 font-semibold">※現行の課題を考慮すると非推奨</p>
+                    </div>
+                    <div class="p-4 border border-yellow-200 rounded-xl bg-yellow-50">
+                        <h3 class="font-bold mb-2 text-yellow-700">案2を推奨するケース</h3>
+                        <ul class="text-sm text-gray-700 space-y-1">
+                            <li>• コストを最小限に抑えたい</li>
+                            <li>• 短期間で立ち上げたい</li>
+                            <li>• 個人参加者が中心の場合</li>
+                            <li>• 請求書払い非対応を許容できる</li>
+                        </ul>
+                    </div>
+                    <div class="p-4 border border-green-200 rounded-xl bg-green-50">
+                        <h3 class="font-bold mb-2 text-green-700">案3を推奨するケース</h3>
+                        <ul class="text-sm text-gray-700 space-y-1">
+                            <li>• 中長期的な運営を視野</li>
+                            <li>• 技術リソースがある/外部委託可能</li>
+                            <li>• 独自のブランディング・UXを重視</li>
+                            <li>• 決済手数料を最小化したい</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3 class="text-lg font-semibold mb-3">段階的移行案（推奨）</h3>
+                <ol class="list-decimal list-inside text-gray-700 space-y-2">
+                    <li><strong>初年度:</strong> 案2（Peatix+OneStream）で低コスト・低リスクにスタート</li>
+                    <li><strong>2年目以降:</strong> 運営ノウハウを蓄積しながら案3（内製化）へ段階移行</li>
+                </ol>
+
+                <div class="alert alert-blue mt-6">
+                    <strong>結論:</strong> いずれの場合も、<strong class="text-red-600">案1（現行）の継続は非推奨</strong>。高コスト・低品質・改善されないという三重苦からの脱却が必要。
+                </div>
+            </section>
+
+            <!-- 参考情報源 -->
+            <section id="references" class="card p-8 shadow-sm">
+                <h2 class="text-2xl font-bold mb-6">参考情報源</h2>
+                <div class="grid md:grid-cols-2 gap-6 text-sm">
+                    <div>
+                        <h3 class="font-semibold mb-2">チケット・イベント管理</h3>
+                        <ul class="space-y-1 text-blue-600">
+                            <li><a href="https://info.eventregist.com/about-eventregist/fee" target="_blank" class="hover:underline">EventRegist 料金ページ</a></li>
+                            <li><a href="https://info.eventregist.com/registration-service/enavle" target="_blank" class="hover:underline">EventRegist-enavle</a></li>
+                            <li><a href="https://services.peatix.com/ja/pricing" target="_blank" class="hover:underline">Peatix 料金</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold mb-2">動画配信</h3>
+                        <ul class="space-y-1 text-blue-600">
+                            <li><a href="https://one-stream.site/price" target="_blank" class="hover:underline">OneStream 料金</a></li>
+                            <li><a href="https://www.cloudflare.com/developer-platform/products/cloudflare-stream/" target="_blank" class="hover:underline">Cloudflare Stream</a></li>
+                            <li><a href="https://www.mux.com/pricing" target="_blank" class="hover:underline">MUX Pricing</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold mb-2">CMS・開発基盤</h3>
+                        <ul class="space-y-1 text-blue-600">
+                            <li><a href="https://microcms.io/" target="_blank" class="hover:underline">microCMS</a></li>
+                            <li><a href="https://www.fooevents.com/" target="_blank" class="hover:underline">FooEvents for WooCommerce</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold mb-2">決済</h3>
+                        <ul class="space-y-1 text-blue-600">
+                            <li><a href="https://stripe.com/jp" target="_blank" class="hover:underline">Stripe Japan</a></li>
+                            <li><a href="https://stripe.com/pricing" target="_blank" class="hover:underline">Stripe 料金</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-100 py-8 px-6 text-center text-sm text-gray-500">
+        <p>&copy; 2026 JTF翻訳祭 事務局資料</p>
+        <div class="mt-2 space-x-4">
+            <a href="system-comparison.html" class="text-blue-600 hover:underline">概要版を見る</a>
+            <a href="JTF翻訳祭_チケット・配信システム比較検討.md" class="text-blue-600 hover:underline">Markdownを見る</a>
+        </div>
+    </footer>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'neutral' });
+    </script>
+</body>
+</html>
