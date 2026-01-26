@@ -180,7 +180,8 @@
                 </table>
                 <p class="text-sm text-gray-500 mt-2">※案2のチケット管理サービスは、Peatix、EventRegist（Enavle連携なし）、Doorkeeper等から選択可能</p>
                 <div class="alert alert-red mt-4">
-                    <strong>⚠️ 案1の重要な制約:</strong> チケット購入は<strong>各参加者本人が個別にEventRegistで行う必要がある</strong>（代理での一括購入不可）。EventRegist登録後はEnavleに自動連携される。
+                    <strong>⚠️ 案1の重要な制約:</strong> チケット購入は<strong>各参加者本人が個別にEventRegistで行う必要がある</strong>（代理での一括購入不可）。<br>
+                    <span class="text-sm">理由: Enavleはシンガポールのサービスであり、本人以外の個人情報を海外サーバーに移転できないため（個人情報保護）。EventRegist登録後はEnavleに自動連携される。</span>
                 </div>
             </section>
 
@@ -336,6 +337,9 @@ sequenceDiagram
                         <li>法人の代理購入ユースケースに対応できない</li>
                         <li>EventRegist登録後はEnavleに自動連携（Enavleへの再登録は不要）</li>
                     </ul>
+                    <p class="text-sm mt-3 pt-3 border-t border-red-200">
+                        <strong>理由:</strong> Enavleはシンガポールのサービスであり、本人以外の個人情報を海外サーバーに移転することは個人情報保護の観点から認められないため。
+                    </p>
                 </div>
 
                 <!-- 事務局コメント -->
