@@ -72,6 +72,7 @@
                 <a href="#plan2">案2: チケット管理+OneStream</a>
                 <a href="#plan3">案3: CMS+内製</a>
                 <a href="#comparison">比較一覧表</a>
+                <a href="#streaming">配信サービス比較</a>
                 <a href="#multi-ticket">複数枚チケット対応</a>
                 <a href="#payment">決済システム比較</a>
                 <a href="#conclusion">総合評価と推奨</a>
@@ -563,6 +564,86 @@ sequenceDiagram
                         <tr><td>サポート体制</td><td class="text-center text-green-600">◎ 手厚い</td><td class="text-center">○ あり</td><td class="text-center text-red-600">✕ 自己対応</td></tr>
                     </tbody>
                 </table>
+            </section>
+
+            <!-- 配信サービス比較 -->
+            <section id="streaming" class="card p-8 shadow-sm mb-8">
+                <h2 class="text-2xl font-bold mb-6">オンデマンド配信サービスの仕組み比較</h2>
+
+                <h3 class="text-lg font-semibold mb-3">サービス別の特徴</h3>
+                <table class="text-sm mb-6">
+                    <thead>
+                        <tr>
+                            <th>サービス</th>
+                            <th>仕組み</th>
+                            <th>課金体系</th>
+                            <th>特徴</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Enavle</strong></td>
+                            <td>外部動画サービスの埋め込み</td>
+                            <td>ホスティング費用＋Enavle利用料</td>
+                            <td>プレーヤーUI・再生品質はホスティング依存</td>
+                        </tr>
+                        <tr>
+                            <td><strong>OneStream</strong></td>
+                            <td>動画を直接アップロード</td>
+                            <td>月額固定（動画容量ベース）</td>
+                            <td>容量内なら視聴人数・時間に関係なく定額</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Cloudflare Stream</strong></td>
+                            <td>動画を直接アップロード</td>
+                            <td>従量課金（保存＋視聴時間）</td>
+                            <td class="text-green-600">安価だがDDoS対策必要</td>
+                        </tr>
+                        <tr>
+                            <td><strong>MUX</strong></td>
+                            <td>動画を直接アップロード</td>
+                            <td>従量課金（エンコード＋保存＋視聴）</td>
+                            <td class="text-green-600">安価だがDDoS対策必要</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="grid md:grid-cols-3 gap-6 mb-6">
+                    <div class="p-4 bg-red-50 rounded-xl">
+                        <h4 class="font-bold text-red-700 mb-2">Enavle（案1）</h4>
+                        <ul class="text-sm text-gray-700 space-y-1">
+                            <li>• 外部サービス（YouTube等）のプレーヤー埋め込み</li>
+                            <li>• 再生品質・UIはホスティング依存</li>
+                            <li>• 現行はYouTubeを使用</li>
+                            <li>• YouTubeのみEnavle側で一部コントロール可能<span class="text-red-600">（使いづらい）</span></li>
+                            <li>• ホスティングが有料なら追加費用発生</li>
+                        </ul>
+                    </div>
+                    <div class="p-4 bg-yellow-50 rounded-xl">
+                        <h4 class="font-bold text-yellow-700 mb-2">OneStream（案2）</h4>
+                        <ul class="text-sm text-gray-700 space-y-1">
+                            <li>• 動画を直接アップロード</li>
+                            <li>• 月額固定（動画容量ベース）</li>
+                            <li>• <span class="text-green-600">視聴人数・時間に関係なく定額</span></li>
+                            <li>• 予算が立てやすい</li>
+                            <li>• 容量超過で上位プラン変更必要</li>
+                        </ul>
+                    </div>
+                    <div class="p-4 bg-green-50 rounded-xl">
+                        <h4 class="font-bold text-green-700 mb-2">Cloudflare Stream / MUX（案3）</h4>
+                        <ul class="text-sm text-gray-700 space-y-1">
+                            <li>• 動画を直接アップロード</li>
+                            <li>• <span class="text-green-600">従量課金で上記2つより安価</span></li>
+                            <li>• 使った分だけの支払い</li>
+                            <li>• スケーラビリティ高い</li>
+                            <li class="text-red-600">• WAF等でDDoS対策必要（攻撃で料金膨張リスク）</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="alert alert-blue">
+                    <strong><i class="fas fa-shield-alt mr-1"></i> セキュリティ対策:</strong> Cloudflare StreamはCloudflareのWAF/DDoS対策と組み合わせることで、攻撃による従量課金リスクを軽減できる。
+                </div>
             </section>
 
             <!-- 複数枚チケット -->

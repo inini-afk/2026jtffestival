@@ -299,6 +299,44 @@ sequenceDiagram
             </table>
         </section>
 
+        <!-- 配信サービス比較 -->
+        <section class="card p-8 shadow-sm mb-16">
+            <h2 class="text-2xl font-bold mb-6">配信サービスの仕組み比較</h2>
+            <div class="grid md:grid-cols-3 gap-4 mb-6">
+                <div class="p-4 bg-red-50 rounded-xl">
+                    <h3 class="font-bold text-red-700 mb-2 text-sm">Enavle（案1）</h3>
+                    <p class="text-xs text-gray-600 mb-2">外部サービス（YouTube等）のプレーヤー埋め込み</p>
+                    <ul class="text-xs text-gray-700 space-y-1">
+                        <li>• 再生品質・UIはホスティング依存</li>
+                        <li>• YouTubeのみ一部コントロール可<span class="text-red-600">（使いづらい）</span></li>
+                        <li>• ホスティングが有料なら追加費用</li>
+                    </ul>
+                </div>
+                <div class="p-4 bg-yellow-50 rounded-xl">
+                    <h3 class="font-bold text-yellow-700 mb-2 text-sm">OneStream（案2）</h3>
+                    <p class="text-xs text-gray-600 mb-2">動画を直接アップロード・月額固定</p>
+                    <ul class="text-xs text-gray-700 space-y-1">
+                        <li class="text-green-600">• 視聴人数・時間に関係なく定額</li>
+                        <li>• 予算が立てやすい</li>
+                        <li>• 容量超過で上位プラン変更必要</li>
+                    </ul>
+                </div>
+                <div class="p-4 bg-green-50 rounded-xl">
+                    <h3 class="font-bold text-green-700 mb-2 text-sm">Cloudflare Stream（案3）</h3>
+                    <p class="text-xs text-gray-600 mb-2">動画を直接アップロード・従量課金</p>
+                    <ul class="text-xs text-gray-700 space-y-1">
+                        <li class="text-green-600">• 上記2つより安価</li>
+                        <li>• 使った分だけの支払い</li>
+                        <li class="text-red-600">• WAF等でDDoS対策必要</li>
+                    </ul>
+                </div>
+            </div>
+            <p class="text-xs text-gray-500 text-center">
+                <i class="fas fa-info-circle mr-1"></i>
+                詳細は<a href="system-comparison-detail.html#streaming" class="text-blue-600 hover:underline">詳細版</a>を参照
+            </p>
+        </section>
+
         <!-- 結論 -->
         <section class="card p-8 shadow-sm bg-gradient-to-br from-green-50 to-blue-50">
             <h2 class="text-2xl font-bold mb-6 text-center">推奨アプローチ</h2>
