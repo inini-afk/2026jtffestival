@@ -17,10 +17,27 @@ Desktop.ini
 # Claude Code local settings
 .claude/settings.local.json
 
-# Node.js (if used in future)
+# Node.js
 node_modules/
 npm-debug.log
+yarn-debug.log*
+yarn-error.log*
 
-# Build output (if used in future)
+# Next.js
+.next/
+out/
+.vercel
+
+# Build output
 dist/
 build/
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Testing
+coverage/
+
+# Misc
+*.pem
