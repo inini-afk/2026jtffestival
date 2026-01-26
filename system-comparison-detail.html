@@ -65,6 +65,7 @@
         <aside class="hidden lg:block w-64 flex-shrink-0">
             <nav class="toc text-sm">
                 <p class="font-semibold mb-3 px-4 text-gray-500">目次</p>
+                <a href="#current">これまでの構成</a>
                 <a href="#overview">比較対象3案の概要</a>
                 <a href="#flow">ロール別フロー図</a>
                 <a href="#plan1">案1: EventRegist+Enavle</a>
@@ -80,6 +81,66 @@
 
         <!-- Main Content -->
         <main class="flex-grow min-w-0">
+
+            <!-- これまでの構成 -->
+            <section id="current" class="card p-8 shadow-sm mb-8">
+                <h2 class="text-2xl font-bold mb-6">これまでの構成（現行）</h2>
+                <table class="mb-6">
+                    <thead>
+                        <tr>
+                            <th>項目</th>
+                            <th>サービス</th>
+                            <th>備考</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>LP（ランディングページ）</td>
+                            <td><strong>Wix</strong></td>
+                            <td>広報委員でも操作しやすいと想定して採用</td>
+                        </tr>
+                        <tr>
+                            <td>チケット申込・管理</td>
+                            <td><strong>EventRegist</strong></td>
+                            <td>Premium機能を利用</td>
+                        </tr>
+                        <tr>
+                            <td>オンデマンド配信</td>
+                            <td><strong>Enavle</strong></td>
+                            <td>EventRegistと連携</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3 class="text-lg font-semibold mb-3">現行構成の課題</h3>
+                <ul class="list-disc list-inside text-gray-600 space-y-1 text-sm mb-6">
+                    <li><strong>Wix</strong>: 広報委員が操作できるようにと導入したが、過去数年間、実質的に作業するのは事務局のみだった</li>
+                    <li><strong>EventRegist + Enavle</strong>: 案1で詳述する課題あり（代理購入不可、プレーヤー品質、高コスト等）</li>
+                </ul>
+
+                <h3 class="text-lg font-semibold mb-3">今年度の方針</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>項目</th>
+                            <th>方針</th>
+                            <th>理由</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>LP</td>
+                            <td><strong>Vercel</strong>（必要に応じてCMS導入）</td>
+                            <td>事務局のみで運用するなら、より柔軟で低コストな構成が可能</td>
+                        </tr>
+                        <tr>
+                            <td>チケット・配信</td>
+                            <td>本資料で検討（案1〜3）</td>
+                            <td>現行の課題を踏まえて最適な構成を選定</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
 
             <!-- 概要 -->
             <section id="overview" class="card p-8 shadow-sm mb-8">
