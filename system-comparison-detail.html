@@ -134,19 +134,19 @@
                 <div class="mermaid mb-6">
 sequenceDiagram
     autonumber
-    participant 申込者
     participant 参加者
     participant EventRegist
     participant Enavle
     participant 事務局
 
-    Note over 申込者,事務局: 【チケット申込フェーズ】
-    申込者->>EventRegist: チケット申込（複数枚可）
-    申込者->>EventRegist: 参加者情報入力
-    申込者->>EventRegist: 決済（クレジット/請求書）
-    EventRegist->>参加者: PDFチケット送信
+    Note over 参加者,事務局: 【チケット申込フェーズ】⚠️各自で申込必須
+    rect rgb(255, 230, 230)
+        参加者->>EventRegist: ⚠️本人が直接チケット申込（代理購入不可）
+        参加者->>EventRegist: 決済（クレジット/請求書）
+        EventRegist->>参加者: チケット発行・メール送信
+    end
 
-    Note over 申込者,事務局: 【視聴登録フェーズ】⚠️ここが課題
+    Note over 参加者,事務局: 【視聴登録フェーズ】⚠️さらに別途登録必須
     rect rgb(255, 230, 230)
         参加者->>Enavle: ⚠️本人が直接アカウント登録（必須）
     end
@@ -154,11 +154,11 @@ sequenceDiagram
 
     参加者->>Enavle: オンデマンド視聴
 
-    Note over 申込者,事務局: 【問い合わせ対応】
+    Note over 参加者,事務局: 【問い合わせ対応】
     参加者->>事務局: 「登録できない」「視聴できない」
-    事務局->>参加者: Enavle登録手順の案内
+    事務局->>参加者: 登録手順の案内
                 </div>
-                <p class="text-sm text-gray-600 mb-8"><strong>課題:</strong> チケット申込と視聴登録が分離、Enavle登録でつまずく参加者への対応負荷</p>
+                <p class="text-sm text-gray-600 mb-8"><strong>課題:</strong> チケット購入も各参加者本人が個別に行う必要あり（代理購入不可）、さらにEnavle登録も必要で参加者への負担大</p>
 
                 <h3 class="text-lg font-bold mb-4 flex items-center gap-2"><span class="badge badge-yellow">案2</span> チケット管理サービス + OneStream</h3>
                 <p class="text-sm text-gray-500 mb-4">※Peatixを例として記載。EventRegist（Enavle連携なし）、Doorkeeper等も選択可能</p>
@@ -520,7 +520,7 @@ sequenceDiagram
                         </tr>
                     </thead>
                     <tbody>
-                        <tr><td>一括購入の容易さ</td><td class="text-center">◎</td><td class="text-center">○</td><td class="text-center">◎</td></tr>
+                        <tr><td>一括購入の容易さ</td><td class="text-center text-red-600 font-semibold">✕ 不可</td><td class="text-center">○</td><td class="text-center">◎</td></tr>
                         <tr><td>各参加者情報収集</td><td class="text-center">◎</td><td class="text-center">△（別途対応要）</td><td class="text-center">◎</td></tr>
                         <tr><td>請求書払い対応</td><td class="text-center text-green-600">◎</td><td class="text-center text-red-600">✕</td><td class="text-center">◎</td></tr>
                         <tr><td>代理での視聴登録</td><td class="text-center text-red-600 font-semibold">✕（Enavle制約）</td><td class="text-center">✕（手動）</td><td class="text-center text-green-600">◎</td></tr>

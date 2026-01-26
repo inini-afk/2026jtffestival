@@ -172,17 +172,19 @@
                     </h3>
                     <div class="mermaid">
 sequenceDiagram
-    participant 申込者
     participant 参加者
     participant EventRegist
     participant Enavle
 
-    申込者->>EventRegist: チケット申込（複数枚可）
-    EventRegist->>参加者: PDFチケット送信
+    rect rgb(255, 230, 230)
+        Note over 参加者,Enavle: ⚠️ 各自で申込必須（代理購入不可）
+        参加者->>EventRegist: 本人が直接チケット申込
+        EventRegist->>参加者: チケット発行
+    end
 
     rect rgb(255, 230, 230)
-        Note over 参加者,Enavle: ⚠️ ここが問題
-        参加者->>Enavle: 本人が直接登録（必須）
+        Note over 参加者,Enavle: ⚠️ さらに別途登録必須
+        参加者->>Enavle: 本人が直接アカウント登録
     end
 
     参加者->>Enavle: オンデマンド視聴
