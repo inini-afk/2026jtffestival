@@ -53,6 +53,106 @@ JTF翻訳祭2026（第35回JTF Translation Festival）の公式サイト。
 | イベント前 | リマインダー |
 | 動画公開時 | 視聴開始のお知らせ |
 
+## Application Architecture（アプリケーション構成）
+
+### リポジトリ構成
+
+**単一リポジトリ（モノレポ）** を採用。認証・型定義・UIコンポーネントを共有し、イベント終了後の一括アーカイブを容易にする。
+
+### ディレクトリ構成（Next.js App Router）
+
+```
+/app
+  /(public)                    # 公開ページ（認証不要）
+    /page.tsx                  # LP（トップ）
+    /sessions/page.tsx         # セッション一覧
+    /ticket/page.tsx           # チケット案内
+    /date-venue/page.tsx       # 日程・会場
+
+  /(auth)                      # 認証系（未ログイン専用）
+    /login/page.tsx            # ログイン
+    /register/page.tsx         # 新規登録
+    /invite/[token]/page.tsx   # 招待リンク
+
+  /(purchaser)                 # 申込者マイページ
+    /mypage/page.tsx           # ダッシュボード
+    /mypage/orders/page.tsx    # 注文履歴
+    /mypage/invite/page.tsx    # 参加者招待
+
+  /(attendee)                  # 参加者マイページ
+    /attendee/page.tsx         # ダッシュボード
+    /attendee/tickets/page.tsx # チケット確認
+
+  /(streaming)                 # オンデマンド配信
+    /watch/[sessionId]/page.tsx
+
+  /(admin)                     # 事務局管理画面
+    /admin/page.tsx            # ダッシュボード
+    /admin/orders/page.tsx     # 注文一覧
+    /admin/attendees/page.tsx  # 参加者一覧
+    /admin/export/page.tsx     # CSV出力
+
+  /api                         # API Routes
+    /auth/
+    /checkout/
+    /webhook/
+    /admin/export/
+
+/components                    # 共有コンポーネント
+/lib                          # ユーティリティ
+/types                        # 型定義
+```
+
+### Route Groups とアクセス制御
+
+| Route Group | 認証 | 必要なロール |
+|-------------|------|-------------|
+| `(public)` | 不要 | - |
+| `(auth)` | 未ログイン専用 | - |
+| `(purchaser)` | 必要 | purchaser |
+| `(attendee)` | 必要 | attendee |
+| `(streaming)` | 必要 | チケット所有確認 |
+| `(admin)` | 必要 | 管理者メールアドレス |
+
+## Admin Panel（事務局管理画面）
+
+### 役割分担
+
+| 機能 | 担当システム |
+|------|-------------|
+| 入金確認・返金処理 | Stripe Dashboard |
+| 銀行振込の消込 | Stripe Bank Transfer（自動） |
+| 売上レポート・CSV | Stripe Dashboard |
+| 参加者名簿 | 自作管理画面 |
+| 名簿CSV出力 | 自作管理画面 |
+| チケット状態管理 | 自作管理画面 |
+| 招待メール再送 | 自作管理画面 |
+
+### 管理者認証
+
+管理者メールアドレスのリストで制御（環境変数で管理）:
+
+```typescript
+// 環境変数: ADMIN_EMAILS=admin@jtf.jp,staff1@jtf.jp,staff2@jtf.jp
+const ADMIN_EMAILS = process.env.ADMIN_EMAILS?.split(',') || []
+
+export async function isAdmin(email: string) {
+  return ADMIN_EMAILS.includes(email)
+}
+```
+
+### CSV出力機能
+
+| CSV種類 | 内容 |
+|---------|------|
+| 注文一覧.csv | 注文ID, 申込者, チケット種別, 金額, 支払状態, 日時 |
+| 参加者名簿.csv | 名前, メール, 所属, チケット種別, 申込者/招待者区分 |
+| 会場参加者.csv | 当日受付用（会場参加権のある人のみ） |
+
+### Stripeチームメンバー
+
+事務局スタッフをStripe Dashboardに招待（**Support**または**Analyst**権限）。
+
 ## Development Phases
 
 | Phase | 内容 | 状態 |
@@ -65,6 +165,7 @@ JTF翻訳祭2026（第35回JTF Translation Festival）の公式サイト。
 | 6 | 招待機能（メール送信・招待リンク） | 未着手 |
 | 7 | Cloudflare Stream連携（動画アップロード） | 未着手 |
 | 8 | 視聴ページ（チケット確認→動画再生） | 未着手 |
+| 9 | 管理画面（名簿・CSV出力） | 未着手 |
 
 ## Data Model（予定）
 
