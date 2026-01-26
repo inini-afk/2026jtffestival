@@ -178,13 +178,9 @@ sequenceDiagram
 
     rect rgb(255, 230, 230)
         Note over 参加者,Enavle: ⚠️ 各自で申込必須（代理購入不可）
-        参加者->>EventRegist: 本人が直接チケット申込
+        参加者->>EventRegist: 本人が直接チケット申込・決済
         EventRegist->>参加者: チケット発行
-    end
-
-    rect rgb(255, 230, 230)
-        Note over 参加者,Enavle: ⚠️ さらに別途登録必須
-        参加者->>Enavle: 本人が直接アカウント登録
+        EventRegist->>Enavle: アカウント自動連携
     end
 
     参加者->>Enavle: オンデマンド視聴

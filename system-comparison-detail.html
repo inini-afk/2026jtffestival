@@ -115,7 +115,7 @@
                 </table>
                 <p class="text-sm text-gray-500 mt-2">※案2のチケット管理サービスは、Peatix、EventRegist（Enavle連携なし）、Doorkeeper等から選択可能</p>
                 <div class="alert alert-red mt-4">
-                    <strong>⚠️ 案1の重要な制約:</strong> 各参加者が個別にチケット購入する必要があり（代理での一括購入不可）、さらにオンデマンド視聴には<strong>各参加者本人がEnavleに直接登録する必要がある</strong>。
+                    <strong>⚠️ 案1の重要な制約:</strong> チケット購入は<strong>各参加者本人が個別にEventRegistで行う必要がある</strong>（代理での一括購入不可）。EventRegist登録後はEnavleに自動連携される。
                 </div>
             </section>
 
@@ -144,21 +144,17 @@ sequenceDiagram
         参加者->>EventRegist: ⚠️本人が直接チケット申込（代理購入不可）
         参加者->>EventRegist: 決済（クレジット/請求書）
         EventRegist->>参加者: チケット発行・メール送信
+        EventRegist->>Enavle: アカウント自動連携
     end
 
-    Note over 参加者,事務局: 【視聴登録フェーズ】⚠️さらに別途登録必須
-    rect rgb(255, 230, 230)
-        参加者->>Enavle: ⚠️本人が直接アカウント登録（必須）
-    end
-    Enavle->>参加者: 視聴アカウント発行
-
+    Note over 参加者,事務局: 【視聴フェーズ】
     参加者->>Enavle: オンデマンド視聴
 
     Note over 参加者,事務局: 【問い合わせ対応】
-    参加者->>事務局: 「登録できない」「視聴できない」
-    事務局->>参加者: 登録手順の案内
+    参加者->>事務局: 「視聴できない」等
+    事務局->>EventRegist: 状況確認
                 </div>
-                <p class="text-sm text-gray-600 mb-8"><strong>課題:</strong> チケット購入も各参加者本人が個別に行う必要あり（代理購入不可）、さらにEnavle登録も必要で参加者への負担大</p>
+                <p class="text-sm text-gray-600 mb-8"><strong>課題:</strong> チケット購入は各参加者本人が個別に行う必要あり（代理購入不可）。法人の一括購入ができない。</p>
 
                 <h3 class="text-lg font-bold mb-4 flex items-center gap-2"><span class="badge badge-yellow">案2</span> チケット管理サービス + OneStream</h3>
                 <p class="text-sm text-gray-500 mb-4">※Peatixを例として記載。EventRegist（Enavle連携なし）、Doorkeeper等も選択可能</p>
@@ -268,12 +264,12 @@ sequenceDiagram
                 </ul>
 
                 <div class="alert alert-red mt-6">
-                    <h4 class="font-bold mb-2">⚠️ 重要な制約：Enavleの海外サーバー問題</h4>
+                    <h4 class="font-bold mb-2">⚠️ 重要な制約：代理購入不可</h4>
                     <ul class="list-disc list-inside text-sm space-y-1">
-                        <li>Enavleはシンガポールの海外サーバーで運用</li>
-                        <li><strong>代理申込が原則不可</strong>: 視聴者本人がEnavleに直接アカウント登録する必要がある</li>
-                        <li>総務部が社員分を一括申込しても、各視聴者が個別にEnavle登録が必要</li>
-                        <li>法人の代理購入ユースケースとの相性が悪い</li>
+                        <li><strong>チケット購入は各参加者本人が個別に行う必要がある</strong></li>
+                        <li>総務部が社員分を一括購入することができない</li>
+                        <li>法人の代理購入ユースケースに対応できない</li>
+                        <li>EventRegist登録後はEnavleに自動連携（Enavleへの再登録は不要）</li>
                     </ul>
                 </div>
 
@@ -490,7 +486,7 @@ sequenceDiagram
                         <tr><td>ランニングコスト</td><td class="text-center">△ 中〜高</td><td class="text-center">○ 低〜中</td><td class="text-center text-green-600">◎ 低（従量制）</td></tr>
                         <tr><td>決済手数料</td><td class="text-center">8%</td><td class="text-center">約5%</td><td class="text-center text-green-600 font-semibold">3.6%</td></tr>
                         <tr><td>導入の容易さ</td><td class="text-center">○ 容易</td><td class="text-center text-green-600">◎ 非常に容易</td><td class="text-center text-red-600">✕ 開発必要</td></tr>
-                        <tr><td>代理申込（視聴）</td><td class="text-center text-red-600 font-semibold">✕ 不可</td><td class="text-center">✕ 手動対応</td><td class="text-center text-green-600">◎ 自由設計</td></tr>
+                        <tr><td>代理申込（視聴）</td><td class="text-center">- 自動連携</td><td class="text-center">✕ 手動対応</td><td class="text-center text-green-600">◎ 自由設計</td></tr>
                         <tr><td>請求書払い</td><td class="text-center text-green-600">◎ 対応</td><td class="text-center text-red-600">✕ 非対応</td><td class="text-center">○ 要実装</td></tr>
                         <tr><td>ユーザー体験</td><td class="text-center">△ Enavle登録の手間</td><td class="text-center">△ 分断</td><td class="text-center">○ 設計次第</td></tr>
                         <tr><td>カスタマイズ性</td><td class="text-center">△ 制限あり</td><td class="text-center">△ 制限あり</td><td class="text-center text-green-600">◎ 完全自由</td></tr>
@@ -523,14 +519,14 @@ sequenceDiagram
                         <tr><td>一括購入の容易さ</td><td class="text-center text-red-600 font-semibold">✕ 不可</td><td class="text-center">○</td><td class="text-center">◎</td></tr>
                         <tr><td>各参加者情報収集</td><td class="text-center">◎</td><td class="text-center">△（別途対応要）</td><td class="text-center">◎</td></tr>
                         <tr><td>請求書払い対応</td><td class="text-center text-green-600">◎</td><td class="text-center text-red-600">✕</td><td class="text-center">◎</td></tr>
-                        <tr><td>代理での視聴登録</td><td class="text-center text-red-600 font-semibold">✕（Enavle制約）</td><td class="text-center">✕（手動）</td><td class="text-center text-green-600">◎</td></tr>
-                        <tr><td>視聴権限の自動付与</td><td class="text-center">△（本人登録後）</td><td class="text-center text-red-600">✕（手動）</td><td class="text-center text-green-600">◎</td></tr>
+                        <tr><td>代理での視聴登録</td><td class="text-center">- 自動連携</td><td class="text-center">✕（手動）</td><td class="text-center text-green-600">◎</td></tr>
+                        <tr><td>視聴権限の自動付与</td><td class="text-center text-green-600">◎（自動連携）</td><td class="text-center text-red-600">✕（手動）</td><td class="text-center text-green-600">◎</td></tr>
                         <tr><td>運用負荷</td><td class="text-center">△（登録フォロー要）</td><td class="text-center">△ 高い</td><td class="text-center">○ 設計次第</td></tr>
                     </tbody>
                 </table>
 
                 <div class="alert alert-red mt-4">
-                    <strong>⚠️ 案1の注意点:</strong> EventRegistでのチケット購入は代理可能だが、Enavle（オンデマンド配信）の視聴登録は各参加者本人が行う必要がある。チケット購入と視聴登録が分離しているため、法人の代理購入ユースケースでは運用負荷が高くなる。
+                    <strong>⚠️ 案1の注意点:</strong> チケット購入は各参加者本人が個別に行う必要がある（代理での一括購入不可）。法人が社員分をまとめて購入することができないため、法人利用には不向き。なお、EventRegist登録後はEnavleに自動連携される。
                 </div>
             </section>
 
