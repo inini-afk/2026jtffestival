@@ -40,13 +40,20 @@
 <body class="antialiased">
 
     <!-- Navigation -->
-    <nav class="fixed w-full z-50 nav-blur">
+    <nav class="fixed w-full z-50 nav-blur transition-all duration-300" id="navbar">
         <div class="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
             <a href="index.html" class="text-sm font-semibold tracking-wide hover:opacity-70 transition-opacity">JTF Translation Festival</a>
             <div class="hidden md:flex space-x-8 text-xs font-medium text-gray-600">
-                <a href="index.html" class="hover:text-black transition-colors">トップ</a>
+                <a href="index.html#concept" class="hover:text-black transition-colors">コンセプト</a>
                 <a href="sessions.html" class="hover:text-black transition-colors">セッション</a>
                 <a href="ticket.html" class="hover:text-black transition-colors">チケット</a>
+                <a href="index.html#news" class="hover:text-black transition-colors">お知らせ</a>
+                <a href="date-venue.html" class="hover:text-black transition-colors">日程・会場</a>
+                <a href="mypage.html" class="hover:text-black transition-colors">マイページ</a>
+                <a href="system-comparison.html" class="text-black font-semibold text-blue-600">システム検討</a>
+            </div>
+            <div class="md:hidden">
+                <button class="text-gray-800"><i class="fas fa-bars"></i></button>
             </div>
         </div>
     </nav>
