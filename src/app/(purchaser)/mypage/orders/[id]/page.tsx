@@ -1,0 +1,281 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useParams, useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { useAuth } from "@/lib/hooks";
+import { getOrderById, OrderWithDetails } from "@/lib/services";
+import { Navigation, BackgroundOrbs } from "@/components";
+
+export default function OrderDetailPage() {
+  const params = useParams();
+  const searchParams = useSearchParams();
+  const { user, loading: authLoading } = useAuth();
+  const [order, setOrder] = useState<OrderWithDetails | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const orderId = params.id as string;
+  const isSuccess = searchParams.get("success") === "true";
+
+  useEffect(() => {
+    async function loadOrder() {
+      if (!user || !orderId) return;
+
+      try {
+        const orderData = await getOrderById(orderId);
+        if (!orderData) {
+          setError("注文が見つかりません");
+        } else {
+          setOrder(orderData);
+        }
+      } catch (err) {
+        console.error("Error loading order:", err);
+        setError("注文の取得に失敗しました");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    if (!authLoading && user) {
+      loadOrder();
+    } else if (!authLoading && !user) {
+      setLoading(false);
+      setError("ログインが必要です");
+    }
+  }, [user, authLoading, orderId]);
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("ja-JP", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat("ja-JP", {
+      style: "currency",
+      currency: "JPY",
+    }).format(price);
+  };
+
+  const getStatusBadge = (status: string) => {
+    const styles: Record<string, string> = {
+      pending: "bg-yellow-100 text-yellow-800",
+      paid: "bg-green-100 text-green-800",
+      cancelled: "bg-gray-100 text-gray-800",
+      refunded: "bg-red-100 text-red-800",
+    };
+    const labels: Record<string, string> = {
+      pending: "支払い待ち",
+      paid: "支払い済み",
+      cancelled: "キャンセル",
+      refunded: "返金済み",
+    };
+    return (
+      <span
+        className={`inline-block px-3 py-1 text-sm font-medium rounded-full ${styles[status] || styles.pending}`}
+      >
+        {labels[status] || status}
+      </span>
+    );
+  };
+
+  const getTicketStatusBadge = (status: string) => {
+    const styles: Record<string, string> = {
+      unassigned: "bg-gray-100 text-gray-800",
+      invited: "bg-blue-100 text-blue-800",
+      assigned: "bg-green-100 text-green-800",
+    };
+    const labels: Record<string, string> = {
+      unassigned: "未割当",
+      invited: "招待中",
+      assigned: "割当済",
+    };
+    return (
+      <span
+        className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${styles[status] || styles.unassigned}`}
+      >
+        {labels[status] || status}
+      </span>
+    );
+  };
+
+  if (authLoading || loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <>
+        <BackgroundOrbs />
+        <Navigation />
+        <main className="pt-24 pb-20 px-6">
+          <div className="max-w-4xl mx-auto text-center">
+            <div className="info-card rounded-2xl p-12">
+              <i className="fas fa-exclamation-circle text-4xl text-red-400 mb-4"></i>
+              <h1 className="text-xl font-bold mb-2">{error}</h1>
+              <Link
+                href="/mypage"
+                className="text-blue-600 hover:text-blue-800"
+              >
+                マイページに戻る
+              </Link>
+            </div>
+          </div>
+        </main>
+      </>
+    );
+  }
+
+  if (!order) {
+    return null;
+  }
+
+  return (
+    <>
+      <BackgroundOrbs />
+      <Navigation />
+
+      <main className="pt-24 pb-20 px-6">
+        <div className="max-w-4xl mx-auto">
+          {/* Success Message */}
+          {isSuccess && (
+            <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl text-green-700 flex items-center gap-3">
+              <i className="fas fa-check-circle text-xl"></i>
+              <div>
+                <p className="font-bold">お支払いが完了しました</p>
+                <p className="text-sm">
+                  ご購入ありがとうございます。チケットが発行されました。
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Breadcrumb */}
+          <div className="mb-6">
+            <Link
+              href="/mypage"
+              className="text-sm text-gray-500 hover:text-gray-700"
+            >
+              ← マイページに戻る
+            </Link>
+          </div>
+
+          {/* Order Header */}
+          <div className="info-card rounded-3xl p-8 mb-8">
+            <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-3 mb-2">
+                  <h1 className="text-2xl font-bold">注文詳細</h1>
+                  {getStatusBadge(order.status)}
+                </div>
+                <p className="font-mono text-gray-500">{order.order_number}</p>
+                <p className="text-sm text-gray-400 mt-1">
+                  {formatDate(order.created_at)}
+                </p>
+              </div>
+              <div className="text-right">
+                <div className="text-3xl font-bold">{formatPrice(order.total)}</div>
+                <div className="text-sm text-gray-500">（税込）</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Order Items */}
+          <div className="info-card rounded-2xl p-6 mb-8">
+            <h2 className="text-lg font-bold mb-4">注文内容</h2>
+            <div className="space-y-4">
+              {order.order_items.map((item) => (
+                <div
+                  key={item.id}
+                  className="flex justify-between items-center py-3 border-b border-gray-100 last:border-0"
+                >
+                  <div>
+                    <p className="font-medium">{item.ticket_type?.name}</p>
+                    <p className="text-sm text-gray-500">
+                      {formatPrice(item.unit_price)} × {item.quantity}
+                    </p>
+                  </div>
+                  <p className="font-bold">
+                    {formatPrice(item.unit_price * item.quantity)}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            <div className="border-t border-gray-200 pt-4 mt-4 space-y-2">
+              <div className="flex justify-between text-sm">
+                <span>小計</span>
+                <span>{formatPrice(order.subtotal)}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span>消費税（10%）</span>
+                <span>{formatPrice(order.tax)}</span>
+              </div>
+              <div className="flex justify-between font-bold text-lg pt-2 border-t border-gray-200">
+                <span>合計</span>
+                <span>{formatPrice(order.total)}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Tickets */}
+          {order.tickets.length > 0 && (
+            <div className="info-card rounded-2xl p-6">
+              <h2 className="text-lg font-bold mb-4">
+                発行済みチケット（{order.tickets.length}枚）
+              </h2>
+              <div className="space-y-3">
+                {order.tickets.map((ticket) => {
+                  const ticketType = order.order_items.find(
+                    (item) => item.ticket_type_id === ticket.ticket_type_id
+                  )?.ticket_type;
+
+                  return (
+                    <div
+                      key={ticket.id}
+                      className="flex items-center justify-between p-4 bg-gray-50 rounded-xl"
+                    >
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-mono text-sm">
+                            {ticket.ticket_number}
+                          </span>
+                          {getTicketStatusBadge(ticket.status)}
+                        </div>
+                        <p className="text-sm text-gray-500">
+                          {ticketType?.name}
+                        </p>
+                      </div>
+                      {ticket.status === "unassigned" && (
+                        <button className="text-sm text-blue-600 hover:text-blue-800">
+                          参加者を招待
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Payment Info */}
+          {order.paid_at && (
+            <div className="mt-6 text-center text-sm text-gray-500">
+              支払い完了: {formatDate(order.paid_at)}
+            </div>
+          )}
+        </div>
+      </main>
+    </>
+  );
+}

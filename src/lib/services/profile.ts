@@ -1,5 +1,10 @@
 import { createClient } from "@/lib/supabase/client";
-import type { Profile, Order, Ticket } from "@/types";
+import type { Profile, Order, Ticket, OrderItem, TicketType } from "@/types";
+
+export interface OrderWithDetails extends Order {
+  order_items: (OrderItem & { ticket_type: TicketType })[];
+  tickets: Ticket[];
+}
 
 /**
  * Get the current user's profile
@@ -170,4 +175,64 @@ export async function getDashboardStats(): Promise<{
   const assignedTickets = tickets.filter((t) => t.status === "assigned").length;
 
   return { totalTickets, invitedTickets, assignedTickets };
+}
+
+/**
+ * Get order by ID with items and tickets
+ */
+export async function getOrderById(orderId: string): Promise<OrderWithDetails | null> {
+  const supabase = createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return null;
+
+  // Fetch order
+  const { data: order, error: orderError } = await supabase
+    .from("orders")
+    .select("*")
+    .eq("id", orderId)
+    .eq("purchaser_id", user.id)
+    .single();
+
+  if (orderError || !order) {
+    console.error("Error fetching order:", orderError);
+    return null;
+  }
+
+  // Fetch order items with ticket types
+  const { data: orderItems, error: itemsError } = await supabase
+    .from("order_items")
+    .select("*, ticket_types(*)")
+    .eq("order_id", orderId);
+
+  if (itemsError) {
+    console.error("Error fetching order items:", itemsError);
+    return null;
+  }
+
+  // Fetch tickets for this order
+  const { data: tickets, error: ticketsError } = await supabase
+    .from("tickets")
+    .select("*")
+    .eq("order_id", orderId);
+
+  if (ticketsError) {
+    console.error("Error fetching tickets:", ticketsError);
+    return null;
+  }
+
+  // Transform order items to include ticket_type
+  const transformedItems = (orderItems || []).map((item) => ({
+    ...item,
+    ticket_type: item.ticket_types as unknown as TicketType,
+  }));
+
+  return {
+    ...order,
+    order_items: transformedItems,
+    tickets: tickets || [],
+  };
 }
