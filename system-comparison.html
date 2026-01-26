@@ -80,51 +80,51 @@
 
                 <div class="mt-4 p-3 bg-red-50 rounded-lg text-xs text-red-700">
                     <i class="fas fa-exclamation-triangle mr-1"></i>
-                    Enavle海外サーバーのため、各参加者が本人登録必須
+                    各参加者が個別にチケット購入＆Enavle本人登録が必須
                 </div>
             </div>
 
             <!-- 案2 -->
             <div class="card card-yellow p-6 shadow-sm">
                 <div class="flex items-center gap-3 mb-4">
-                    <span class="badge badge-yellow">低コスト</span>
+                    <span class="badge badge-yellow">フォールバック</span>
                     <span class="text-2xl font-bold">案2</span>
                 </div>
-                <h3 class="text-xl font-bold mb-2">Peatix + OneStream</h3>
-                <p class="text-gray-500 text-sm mb-4">分離型（別サービス）</p>
+                <h3 class="text-xl font-bold mb-2">チケット管理 + OneStream</h3>
+                <p class="text-gray-500 text-sm mb-4">分離型（Peatix/EventRegist等 + OneStream）</p>
 
                 <div class="space-y-2 text-sm">
                     <div class="flex justify-between"><span class="text-gray-500">初期費用</span><span class="font-semibold text-green-600">ほぼ無料</span></div>
-                    <div class="flex justify-between"><span class="text-gray-500">決済手数料</span><span>約5%</span></div>
-                    <div class="flex justify-between"><span class="text-gray-500">請求書払い</span><span class="text-red-600">非対応</span></div>
+                    <div class="flex justify-between"><span class="text-gray-500">決済手数料</span><span>サービスによる</span></div>
+                    <div class="flex justify-between"><span class="text-gray-500">請求書払い</span><span class="text-yellow-600">サービスによる</span></div>
                     <div class="flex justify-between"><span class="text-gray-500">代理視聴登録</span><span class="text-yellow-600">手動対応</span></div>
                 </div>
 
                 <div class="mt-4 p-3 bg-yellow-50 rounded-lg text-xs text-yellow-700">
-                    <i class="fas fa-hand-paper mr-1"></i>
-                    事務局の手動作業が多い（情報収集・アカウント登録）
+                    <i class="fas fa-exclamation-triangle mr-1"></i>
+                    配信開始後は招待URL方式→URL流出リスクあり
                 </div>
             </div>
 
             <!-- 案3 -->
             <div class="card card-green p-6 shadow-sm">
                 <div class="flex items-center gap-3 mb-4">
-                    <span class="badge badge-green">推奨</span>
+                    <span class="badge badge-green">推奨・優先検討</span>
                     <span class="text-2xl font-bold">案3</span>
                 </div>
                 <h3 class="text-xl font-bold mb-2">CMS + 内製</h3>
-                <p class="text-gray-500 text-sm mb-4">WordPress/microCMS + Cloudflare Stream</p>
+                <p class="text-gray-500 text-sm mb-4">Next.js + Supabase + Cloudflare Stream</p>
 
                 <div class="space-y-2 text-sm">
-                    <div class="flex justify-between"><span class="text-gray-500">初期費用</span><span>開発費依存</span></div>
+                    <div class="flex justify-between"><span class="text-gray-500">初期費用</span><span>AIエージェント活用で削減</span></div>
                     <div class="flex justify-between"><span class="text-gray-500">決済手数料</span><span class="font-semibold text-green-600">3.6%（Stripe）</span></div>
                     <div class="flex justify-between"><span class="text-gray-500">請求書払い</span><span class="text-green-600">実装可能</span></div>
                     <div class="flex justify-between"><span class="text-gray-500">代理視聴登録</span><span class="text-green-600 font-semibold">自動化可能</span></div>
                 </div>
 
                 <div class="mt-4 p-3 bg-green-50 rounded-lg text-xs text-green-700">
-                    <i class="fas fa-check-circle mr-1"></i>
-                    申込→視聴までシームレス。長期的にコスト最小
+                    <i class="fas fa-robot mr-1"></i>
+                    AIエージェント（Claude Code等）活用で開発コスト削減
                 </div>
             </div>
         </section>
@@ -275,23 +275,27 @@ sequenceDiagram
 
         <!-- 結論 -->
         <section class="card p-8 shadow-sm bg-gradient-to-br from-green-50 to-blue-50">
-            <h2 class="text-2xl font-bold mb-6 text-center">結論</h2>
+            <h2 class="text-2xl font-bold mb-6 text-center">推奨アプローチ</h2>
             <div class="max-w-3xl mx-auto">
                 <div class="grid md:grid-cols-2 gap-6">
-                    <div class="bg-white p-6 rounded-xl">
-                        <h3 class="font-bold text-lg mb-2 text-green-700">短期的（次回開催）</h3>
+                    <div class="bg-white p-6 rounded-xl border-2 border-green-400">
+                        <h3 class="font-bold text-lg mb-2 text-green-700">1. まず案3を検討・着手</h3>
                         <p class="text-sm text-gray-600">
-                            <strong>案2（Peatix + OneStream）</strong>で低コスト・低リスクにスタート。
-                            手動作業は発生するが、現行より参加者体験は改善。
+                            <strong>AIエージェント（Claude Code等）</strong>を活用し、従来より低コスト・短期間での内製化を目指す。
+                            開発の進捗・品質を見極めながら進行。
                         </p>
                     </div>
                     <div class="bg-white p-6 rounded-xl">
-                        <h3 class="font-bold text-lg mb-2 text-blue-700">中長期的（2〜3年後）</h3>
+                        <h3 class="font-bold text-lg mb-2 text-yellow-700">2. 困難な場合は案2にフォールバック</h3>
                         <p class="text-sm text-gray-600">
-                            <strong>案3（内製）</strong>へ段階移行。
-                            決済手数料最小化、代理申込の自動化、ブランド体験の統一を実現。
+                            開発が間に合わない場合は<strong>案2（チケット管理+OneStream）</strong>で確実に運営。
+                            得たノウハウを次年度の案3再挑戦に活かす。
                         </p>
                     </div>
+                </div>
+                <div class="bg-blue-50 p-4 rounded-xl mt-6 text-sm text-blue-800">
+                    <i class="fas fa-lightbulb mr-1"></i>
+                    <strong>なぜ案3を先に検討するのか:</strong> 案2を先に採用すると、翌年度以降に案3への移行が検討されにくくなる傾向がある。
                 </div>
                 <p class="text-center mt-6 text-gray-500 text-sm">
                     いずれの場合も、<strong class="text-red-600">案1（現行）の継続は非推奨</strong>。<br>
@@ -309,7 +313,7 @@ sequenceDiagram
             <a href="system-comparison-detail.html" class="text-blue-600 hover:underline">
                 <i class="fas fa-file-alt mr-1"></i>詳細版を見る
             </a>
-            <a href="JTF翻訳祭_チケット・配信システム比較検討.md" class="text-gray-500 hover:underline">
+            <a href="system-comparison-analysis.md" class="text-gray-500 hover:underline">
                 Markdown版
             </a>
         </div>

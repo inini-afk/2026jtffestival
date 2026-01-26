@@ -67,7 +67,7 @@
                 <a href="#overview">比較対象3案の概要</a>
                 <a href="#flow">ロール別フロー図</a>
                 <a href="#plan1">案1: EventRegist+Enavle</a>
-                <a href="#plan2">案2: Peatix+OneStream</a>
+                <a href="#plan2">案2: チケット管理+OneStream</a>
                 <a href="#plan3">案3: CMS+内製</a>
                 <a href="#comparison">比較一覧表</a>
                 <a href="#multi-ticket">複数枚チケット対応</a>
@@ -101,7 +101,7 @@
                         </tr>
                         <tr>
                             <td><span class="badge badge-yellow">案2</span></td>
-                            <td>Peatix等</td>
+                            <td>任意のチケット管理サービス※</td>
                             <td>OneStream</td>
                             <td>分離（別サービス）</td>
                         </tr>
@@ -113,8 +113,9 @@
                         </tr>
                     </tbody>
                 </table>
+                <p class="text-sm text-gray-500 mt-2">※案2のチケット管理サービスは、Peatix、EventRegist（Enavle連携なし）、Doorkeeper等から選択可能</p>
                 <div class="alert alert-red mt-4">
-                    <strong>⚠️ 案1の重要な制約:</strong> Enavleは海外サーバー（シンガポール）で運用されているため、オンデマンド視聴には<strong>各参加者本人がEnavleに直接登録する必要がある</strong>。代理申込（視聴登録）は原則不可。
+                    <strong>⚠️ 案1の重要な制約:</strong> 各参加者が個別にチケット購入する必要があり（代理での一括購入不可）、さらにオンデマンド視聴には<strong>各参加者本人がEnavleに直接登録する必要がある</strong>。
                 </div>
             </section>
 
@@ -159,7 +160,8 @@ sequenceDiagram
                 </div>
                 <p class="text-sm text-gray-600 mb-8"><strong>課題:</strong> チケット申込と視聴登録が分離、Enavle登録でつまずく参加者への対応負荷</p>
 
-                <h3 class="text-lg font-bold mb-4 flex items-center gap-2"><span class="badge badge-yellow">案2</span> Peatix + OneStream</h3>
+                <h3 class="text-lg font-bold mb-4 flex items-center gap-2"><span class="badge badge-yellow">案2</span> チケット管理サービス + OneStream</h3>
+                <p class="text-sm text-gray-500 mb-4">※Peatixを例として記載。EventRegist（Enavle連携なし）、Doorkeeper等も選択可能</p>
                 <div class="mermaid mb-6">
 sequenceDiagram
     autonumber
@@ -311,13 +313,13 @@ sequenceDiagram
             <!-- 案2詳細 -->
             <section id="plan2" class="card p-8 shadow-sm mb-8">
                 <h2 class="text-2xl font-bold mb-2 flex items-center gap-3">
-                    <span class="badge badge-yellow">低コスト</span>
-                    案2: Peatix + OneStream（分離型）
+                    <span class="badge badge-yellow">フォールバック</span>
+                    案2: チケット管理サービス + OneStream（分離型）
                 </h2>
 
                 <h3 class="text-lg font-semibold mt-6 mb-3">サービス概要</h3>
                 <ul class="list-disc list-inside text-gray-600 space-y-1">
-                    <li><strong>Peatix</strong>: 国内最大級のイベント・チケット販売プラットフォーム</li>
+                    <li><strong>チケット管理</strong>: Peatix、EventRegist（Enavle連携なし）、Doorkeeper等から選択</li>
                     <li><strong>OneStream</strong>: 株式会社ルートチーム運営の動画配信サイト構築プラットフォーム</li>
                 </ul>
 
@@ -357,22 +359,50 @@ sequenceDiagram
                 </ul>
 
                 <div class="alert alert-yellow">
-                    <strong>注意:</strong> Peatixは請求書払い非対応。法人からの一括購入には別途対応が必要。
+                    <strong>注意:</strong> Peatixは請求書払い非対応。法人からの一括購入には別途対応が必要（EventRegistは対応可）。
+                </div>
+
+                <h3 class="text-lg font-semibold mt-6 mb-3">OneStream登録のタイミングによる運用の違い</h3>
+                <table class="text-sm mb-4">
+                    <thead>
+                        <tr><th>タイミング</th><th>登録方法</th><th>運用</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="font-medium">オンデマンド配信開始前</td>
+                            <td>事務局が事前にID/パスワードを準備</td>
+                            <td>参加者情報を収集後、事務局がOneStreamに一括登録</td>
+                        </tr>
+                        <tr>
+                            <td class="font-medium">オンデマンド配信開始後</td>
+                            <td>参加者が自身でサインアップ</td>
+                            <td>チケット自動返信メールに招待URLを記載</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="alert alert-red">
+                    <strong>⚠️ セキュリティ上の懸念:</strong> 配信開始後の運用では、招待用URLがメールに記載されるため、<strong>このURLが外部に流出した場合、第三者がOneStreamに登録できてしまうリスク</strong>がある。
                 </div>
             </section>
 
             <!-- 案3詳細 -->
             <section id="plan3" class="card p-8 shadow-sm mb-8">
                 <h2 class="text-2xl font-bold mb-2 flex items-center gap-3">
-                    <span class="badge badge-green">推奨</span>
+                    <span class="badge badge-green">推奨・優先検討</span>
                     案3: CMS + ストリーミングサービス（内製化）
                 </h2>
 
+                <div class="alert alert-green mb-6">
+                    <strong><i class="fas fa-robot mr-1"></i> 開発手法:</strong> AIエージェント（Claude Code等）を活用した開発を前提とする。これにより、従来の外部委託や専任エンジニア確保に比べて、開発コストの大幅な削減と迅速な実装が可能。
+                </div>
+
                 <h3 class="text-lg font-semibold mt-6 mb-3">サービス概要</h3>
                 <ul class="list-disc list-inside text-gray-600 space-y-1">
-                    <li><strong>CMS</strong>: microCMS（国産ヘッドレスCMS）またはWordPress</li>
-                    <li><strong>動画配信</strong>: Cloudflare Stream または MUX</li>
+                    <li><strong>フロントエンド</strong>: Next.js (App Router + TypeScript)</li>
+                    <li><strong>認証・DB</strong>: Supabase</li>
+                    <li><strong>動画配信</strong>: Cloudflare Stream</li>
                     <li><strong>決済</strong>: Stripe（3.6%）</li>
+                    <li><strong>メール</strong>: Resend</li>
                 </ul>
 
                 <h3 class="text-lg font-semibold mt-6 mb-3">料金体系</h3>
@@ -428,10 +458,10 @@ sequenceDiagram
                     </div>
                 </div>
 
-                <h3 class="text-lg font-semibold mt-6 mb-3">デメリット</h3>
+                <h3 class="text-lg font-semibold mt-6 mb-3">デメリット（AIエージェント活用で軽減可能）</h3>
                 <ul class="list-disc list-inside text-gray-600 space-y-1 text-sm">
-                    <li><strong>開発リソースが必要</strong>: エンジニアまたは外部委託が必須</li>
-                    <li><strong>構築期間</strong>: 数週間〜数ヶ月の開発期間</li>
+                    <li><strong>開発リソースが必要</strong>: エンジニアまたは外部委託が必須 → <span class="text-green-600">AIエージェント活用により軽減</span></li>
+                    <li><strong>構築期間</strong>: 数週間〜数ヶ月の開発期間 → <span class="text-green-600">AIエージェント活用により短縮可能</span></li>
                     <li><strong>保守・メンテナンス責任</strong>: 障害対応は自己責任</li>
                 </ul>
 
@@ -539,7 +569,7 @@ sequenceDiagram
 
             <!-- 総合評価 -->
             <section id="conclusion" class="card p-8 shadow-sm mb-8">
-                <h2 class="text-2xl font-bold mb-6">総合評価と推奨シナリオ</h2>
+                <h2 class="text-2xl font-bold mb-6">総合評価と推奨アプローチ</h2>
 
                 <div class="grid md:grid-cols-3 gap-6 mb-8">
                     <div class="p-4 border border-red-200 rounded-xl bg-red-50">
@@ -552,32 +582,43 @@ sequenceDiagram
                         <p class="text-xs text-red-600 mt-2 font-semibold">※現行の課題を考慮すると非推奨</p>
                     </div>
                     <div class="p-4 border border-yellow-200 rounded-xl bg-yellow-50">
-                        <h3 class="font-bold mb-2 text-yellow-700">案2を推奨するケース</h3>
+                        <h3 class="font-bold mb-2 text-yellow-700">案2: フォールバック用</h3>
                         <ul class="text-sm text-gray-700 space-y-1">
-                            <li>• コストを最小限に抑えたい</li>
-                            <li>• 短期間で立ち上げたい</li>
-                            <li>• 個人参加者が中心の場合</li>
-                            <li>• 請求書払い非対応を許容できる</li>
+                            <li>• 案3の開発が間に合わない場合</li>
+                            <li>• 技術的課題が解決できない場合</li>
+                            <li>• 確実に運営を実施したい場合</li>
                         </ul>
+                        <p class="text-xs text-yellow-600 mt-2 font-semibold">※案3が困難な場合の代替案</p>
                     </div>
-                    <div class="p-4 border border-green-200 rounded-xl bg-green-50">
-                        <h3 class="font-bold mb-2 text-green-700">案3を推奨するケース</h3>
+                    <div class="p-4 border-2 border-green-400 rounded-xl bg-green-50">
+                        <h3 class="font-bold mb-2 text-green-700">案3: 優先検討</h3>
                         <ul class="text-sm text-gray-700 space-y-1">
-                            <li>• 中長期的な運営を視野</li>
-                            <li>• 技術リソースがある/外部委託可能</li>
-                            <li>• 独自のブランディング・UXを重視</li>
-                            <li>• 決済手数料を最小化したい</li>
+                            <li>• AIエージェント活用で低コスト開発</li>
+                            <li>• 独自のブランディング・UXを実現</li>
+                            <li>• 決済手数料を最小化（3.6%）</li>
+                            <li>• 翌年以降も資産として再利用</li>
                         </ul>
                     </div>
                 </div>
 
-                <h3 class="text-lg font-semibold mb-3">段階的移行案（推奨）</h3>
+                <h3 class="text-lg font-semibold mb-3">推奨アプローチ（フォールバック戦略）</h3>
                 <ol class="list-decimal list-inside text-gray-700 space-y-2">
-                    <li><strong>初年度:</strong> 案2（Peatix+OneStream）で低コスト・低リスクにスタート</li>
-                    <li><strong>2年目以降:</strong> 運営ノウハウを蓄積しながら案3（内製化）へ段階移行</li>
+                    <li><strong>まず案3（内製化）を検討・着手:</strong> AIエージェント（Claude Code等）を活用した開発で、従来より低コスト・短期間での実装を目指す</li>
+                    <li><strong>案3が困難な場合は案2にフォールバック:</strong> 開発が間に合わない場合は案2（チケット管理サービス+OneStream）で確実に運営</li>
                 </ol>
 
                 <div class="alert alert-blue mt-6">
+                    <strong><i class="fas fa-lightbulb mr-1"></i> なぜ案3を先に検討するのか:</strong> 案2を先に採用すると、翌年度以降に案3への移行が検討されにくくなる傾向がある。内製化のメリット（コスト削減、カスタマイズ性、データ管理）を享受するためには、最初から案3を目標として取り組むことが重要。
+                </div>
+
+                <h3 class="text-lg font-semibold mt-6 mb-3">案3の段階的実装</h3>
+                <ul class="list-disc list-inside text-gray-700 space-y-1 text-sm">
+                    <li><strong>Phase 1:</strong> チケット販売は既存サービス（EventRegist Basic等）を利用、配信のみ内製（Cloudflare Stream）</li>
+                    <li><strong>Phase 2:</strong> 認証・会員管理を追加（Supabase Auth）</li>
+                    <li><strong>Phase 3:</strong> チケット販売も内製化（Stripe決済）</li>
+                </ul>
+
+                <div class="alert alert-red mt-6">
                     <strong>結論:</strong> いずれの場合も、<strong class="text-red-600">案1（現行）の継続は非推奨</strong>。高コスト・低品質・改善されないという三重苦からの脱却が必要。
                 </div>
             </section>
@@ -627,7 +668,7 @@ sequenceDiagram
         <p>&copy; 2026 JTF翻訳祭 事務局資料</p>
         <div class="mt-2 space-x-4">
             <a href="system-comparison.html" class="text-blue-600 hover:underline">概要版を見る</a>
-            <a href="JTF翻訳祭_チケット・配信システム比較検討.md" class="text-blue-600 hover:underline">Markdownを見る</a>
+            <a href="system-comparison-analysis.md" class="text-blue-600 hover:underline">Markdownを見る</a>
         </div>
     </footer>
 
