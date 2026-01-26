@@ -185,6 +185,21 @@ Supabaseの注文ステータスを更新
 python -m http.server 8000
 ```
 
+## SEO / クローラー設定
+
+### 現在の設定（開発・テスト環境）
+- `robots.txt`: 全クローラーをブロック
+- 全HTMLファイルに `<meta name="robots" content="noindex, nofollow">` を設定
+
+### 本番公開時の作業（TODO）
+1. `robots.txt` を削除または以下に変更:
+   ```
+   User-agent: *
+   Allow: /
+   ```
+2. 全HTMLファイルから `<meta name="robots" content="noindex, nofollow">` を削除
+3. 必要に応じて `sitemap.xml` を作成
+
 ## MicroCMS Configuration
 
 `index.html`内の`CMS_CONFIG`オブジェクト（354-357行目付近）でAPIキーを設定：
