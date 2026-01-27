@@ -2,23 +2,72 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAuth } from "@/lib/hooks";
+import { useState, useEffect } from "react";
+import { createClient } from "@/lib/supabase/client";
 
-const navItems = [
+const baseNavItems = [
   { href: "/#concept", label: "コンセプト" },
   { href: "/sessions", label: "セッション" },
   { href: "/ticket", label: "チケット" },
   { href: "/#news", label: "お知らせ" },
   { href: "/date-venue", label: "日程・会場" },
-  { href: "/mypage", label: "マイページ" },
 ];
 
 export default function Navigation() {
   const pathname = usePathname();
+  const { user, loading } = useAuth();
+  const [roles, setRoles] = useState<string[]>([]);
+
+  useEffect(() => {
+    async function loadRoles() {
+      if (!user) {
+        setRoles([]);
+        return;
+      }
+
+      const supabase = createClient();
+      const { data } = await supabase
+        .from("profiles")
+        .select("roles")
+        .eq("id", user.id)
+        .single();
+
+      if (data?.roles) {
+        setRoles(data.roles);
+      }
+    }
+
+    if (!loading) {
+      loadRoles();
+    }
+  }, [user, loading]);
 
   const isActive = (href: string) => {
     if (href.startsWith("/#")) return false;
     return pathname === href || pathname.startsWith(href + "/");
   };
+
+  // Determine mypage link based on roles
+  const getMypageLink = () => {
+    if (!user) return { href: "/login", label: "ログイン" };
+
+    // If user has purchaser role, show purchaser mypage
+    if (roles.includes("purchaser")) {
+      return { href: "/mypage", label: "マイページ" };
+    }
+
+    // If user only has attendee role, show attendee page
+    if (roles.includes("attendee")) {
+      return { href: "/attendee", label: "マイページ" };
+    }
+
+    // Default to login if no roles yet
+    return { href: "/mypage", label: "マイページ" };
+  };
+
+  const mypageItem = getMypageLink();
+  const navItems = [...baseNavItems, mypageItem];
 
   return (
     <nav

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/hooks";
 import { createClient } from "@/lib/supabase/client";
@@ -14,11 +14,18 @@ interface TicketWithType extends Ticket {
 
 function AttendeeContent() {
   const searchParams = useSearchParams();
-  const { user, loading: authLoading } = useAuth();
+  const router = useRouter();
+  const { user, loading: authLoading, signOut } = useAuth();
   const [tickets, setTickets] = useState<TicketWithType[]>([]);
   const [loading, setLoading] = useState(true);
 
   const isWelcome = searchParams.get("welcome") === "true";
+
+  const handleSignOut = async () => {
+    await signOut();
+    router.push("/");
+    router.refresh();
+  };
 
   useEffect(() => {
     async function loadTickets() {
@@ -88,6 +95,12 @@ function AttendeeContent() {
                 <h1 className="text-2xl font-bold mb-1">{userName} さん</h1>
                 <p className="text-gray-500">参加者マイページ</p>
               </div>
+              <button
+                onClick={handleSignOut}
+                className="text-sm text-gray-500 hover:text-red-600 transition-colors"
+              >
+                ログアウト
+              </button>
             </div>
           </div>
 
