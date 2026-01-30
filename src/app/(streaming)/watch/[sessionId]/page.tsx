@@ -208,10 +208,10 @@ export default function WatchPage() {
         {/* 戻るリンク */}
         <div className="mt-6">
           <button
-            onClick={() => router.push("/sessions")}
+            onClick={() => router.push("/mypage/streaming")}
             className="text-blue-600 hover:text-blue-800 transition"
           >
-            ← セッション一覧に戻る
+            ← オンデマンド配信一覧に戻る
           </button>
         </div>
       </div>

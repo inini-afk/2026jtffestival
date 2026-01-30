@@ -157,7 +157,29 @@ export default function MyPage() {
           </div>
 
           {/* Action Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* On-demand Streaming */}
+            <Link
+              href="/mypage/streaming"
+              className="info-card rounded-2xl p-6 hover:shadow-lg transition-shadow group"
+            >
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <svg className="w-6 h-6 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="font-bold mb-1 group-hover:text-red-600 transition-colors">
+                    オンデマンド配信
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    セッション動画を視聴
+                  </p>
+                </div>
+              </div>
+            </Link>
+
             {/* Buy Ticket */}
             <Link
               href="/ticket"
@@ -165,7 +187,9 @@ export default function MyPage() {
             >
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <i className="fas fa-ticket-alt text-blue-600"></i>
+                  <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
+                  </svg>
                 </div>
                 <div>
                   <h3 className="font-bold mb-1 group-hover:text-blue-600 transition-colors">
@@ -185,14 +209,16 @@ export default function MyPage() {
             >
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <i className="fas fa-play-circle text-purple-600"></i>
+                  <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
                 </div>
                 <div>
                   <h3 className="font-bold mb-1 group-hover:text-purple-600 transition-colors">
-                    セッション一覧
+                    登壇者紹介
                   </h3>
                   <p className="text-sm text-gray-500">
-                    登壇者とセッション内容を確認
+                    セッション内容と登壇者を確認
                   </p>
                 </div>
               </div>
