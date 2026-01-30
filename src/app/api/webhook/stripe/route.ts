@@ -4,6 +4,7 @@ import Stripe from "stripe";
 import { getStripeServer } from "@/lib/stripe";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/types";
+import { sendEmail, purchaseConfirmationEmail } from "@/lib/email";
 
 // Use service role for webhook (no RLS restrictions)
 function getSupabaseAdmin() {
@@ -141,7 +142,89 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     console.log(
       `Order ${orderId} completed. Created ${tickets.length} tickets.`
     );
+
+    // Send purchase confirmation email
+    await sendPurchaseConfirmationEmail(supabase, orderId, userId);
   } catch (error) {
     console.error("Error handling checkout completed:", error);
+  }
+}
+
+async function sendPurchaseConfirmationEmail(
+  supabase: ReturnType<typeof getSupabaseAdmin>,
+  orderId: string,
+  userId: string
+) {
+  try {
+    // Get order with items and ticket types
+    const { data: order, error: orderError } = await supabase
+      .from("orders")
+      .select("*")
+      .eq("id", orderId)
+      .single();
+
+    if (orderError || !order) {
+      console.error("Error fetching order for email:", orderError);
+      return;
+    }
+
+    // Get order items with ticket types
+    const { data: orderItems, error: itemsError } = await supabase
+      .from("order_items")
+      .select("*, ticket_type:ticket_types(*)")
+      .eq("order_id", orderId);
+
+    if (itemsError || !orderItems) {
+      console.error("Error fetching order items for email:", itemsError);
+      return;
+    }
+
+    // Get purchaser profile
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", userId)
+      .single();
+
+    if (profileError || !profile) {
+      console.error("Error fetching profile for email:", profileError);
+      return;
+    }
+
+    // Format items for email
+    const items = orderItems.map((item) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const ticketType = item.ticket_type as any;
+      return {
+        name: ticketType?.name || "チケット",
+        quantity: item.quantity,
+        unitPrice: item.unit_price,
+      };
+    });
+
+    const emailContent = purchaseConfirmationEmail({
+      purchaserName: profile.name || "お客様",
+      orderNumber: order.order_number,
+      items,
+      subtotal: order.subtotal,
+      tax: order.tax,
+      total: order.total,
+      paymentMethod: order.payment_method || "card",
+    });
+
+    const result = await sendEmail({
+      to: profile.email,
+      subject: emailContent.subject,
+      html: emailContent.html,
+      text: emailContent.text,
+    });
+
+    if (result.success) {
+      console.log(`Purchase confirmation email sent for order ${order.order_number}`);
+    } else {
+      console.error(`Failed to send purchase confirmation email: ${result.error}`);
+    }
+  } catch (error) {
+    console.error("Error sending purchase confirmation email:", error);
   }
 }

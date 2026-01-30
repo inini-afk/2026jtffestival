@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { randomBytes } from "crypto";
+import { sendEmail, inviteEmail } from "@/lib/email";
 
 export async function POST(request: NextRequest) {
   try {
@@ -39,12 +40,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get the ticket and verify ownership
+    // Get the ticket with ticket type info and verify ownership
     const { data: ticket, error: ticketError } = await supabase
       .from("tickets")
-      .select("*")
+      .select("*, ticket_type:ticket_types(*)")
       .eq("id", ticketId)
       .eq("purchaser_id", user.id)
+      .single();
+
+    // Get purchaser profile
+    const { data: purchaserProfile } = await supabase
+      .from("profiles")
+      .select("name")
+      .eq("id", user.id)
       .single();
 
     if (ticketError || !ticket) {
@@ -84,11 +92,37 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // TODO: Send email using Resend
-    // For now, just log the invite link
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || request.nextUrl.origin;
+    // Send invitation email using Resend
+    const purchaserName = purchaserProfile?.name || "JTF翻訳祭2026参加者";
+    const ticketTypeName = ticket.ticket_type?.name || "チケット";
+
+    const emailContent = inviteEmail({
+      purchaserName,
+      ticketTypeName,
+      inviteToken,
+    });
+
+    const emailResult = await sendEmail({
+      to: email,
+      subject: emailContent.subject,
+      html: emailContent.html,
+      text: emailContent.text,
+    });
+
+    if (!emailResult.success) {
+      console.error("[Invite] Email send failed:", emailResult.error);
+      // Note: We don't fail the request since the ticket is already updated.
+      // The invite can be resent later if needed.
+    }
+
+    // Generate invite URL for logging/response
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin;
     const inviteUrl = `${baseUrl}/invite/${inviteToken}`;
-    console.log(`Invite URL for ${email}: ${inviteUrl}`);
+
+    // Log invite URL in development
+    if (process.env.NODE_ENV === "development") {
+      console.log(`[Invite] URL for ${email}: ${inviteUrl}`);
+    }
 
     return NextResponse.json({
       success: true,
