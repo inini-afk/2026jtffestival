@@ -49,6 +49,11 @@ export async function updateSession(request: NextRequest) {
   // Protected routes check
   const path = request.nextUrl.pathname;
 
+  // OAuth callback - skip auth checks
+  if (path.startsWith("/auth/callback")) {
+    return supabaseResponse;
+  }
+
   // Routes that require authentication
   const protectedRoutes = ["/mypage", "/attendee", "/watch", "/admin"];
   const isProtectedRoute = protectedRoutes.some((route) =>
