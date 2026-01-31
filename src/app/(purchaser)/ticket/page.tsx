@@ -5,8 +5,10 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/hooks";
 import { getTicketTypes } from "@/lib/services";
-import { Navigation, BackgroundOrbs } from "@/components";
+import { Navigation, BackgroundOrbs, PromoCodeInput } from "@/components";
+import { usePromoCode, calculateDiscountedPrice, getDiscountDescription } from "@/lib/hooks/usePromoCode";
 import type { TicketType } from "@/types";
+import type { PromoCode } from "@/lib/hooks/usePromoCode";
 
 interface CartItem {
   ticketType: TicketType;
@@ -21,6 +23,7 @@ export default function TicketPage() {
   const [loading, setLoading] = useState(true);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [appliedPromoCode, setAppliedPromoCode] = useState<PromoCode | null>(null);
 
   useEffect(() => {
     async function loadTicketTypes() {
@@ -69,8 +72,31 @@ export default function TicketPage() {
     (sum, item) => sum + item.ticketType.price * item.quantity,
     0
   );
-  const tax = Math.floor(subtotal * 0.1);
-  const total = subtotal + tax;
+
+  // Calculate discount based on promo code
+  const calculateDiscount = () => {
+    if (!appliedPromoCode) return 0;
+
+    switch (appliedPromoCode.discountType) {
+      case "free_all":
+        return subtotal;
+      case "member_price":
+        // Assume 20% discount for member price (adjust as needed)
+        return Math.floor(subtotal * 0.2);
+      case "fixed_price":
+        if (appliedPromoCode.fixedPrice !== undefined) {
+          return Math.max(0, subtotal - appliedPromoCode.fixedPrice);
+        }
+        return 0;
+      default:
+        return 0;
+    }
+  };
+
+  const discount = calculateDiscount();
+  const discountedSubtotal = subtotal - discount;
+  const tax = Math.floor(discountedSubtotal * 0.1);
+  const total = discountedSubtotal + tax;
   const totalTickets = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   const formatPrice = (price: number) => {
@@ -105,6 +131,7 @@ export default function TicketPage() {
             ticketTypeId: item.ticketType.id,
             quantity: item.quantity,
           })),
+          promoCodeId: appliedPromoCode?.id,
         }),
       });
 
@@ -249,11 +276,26 @@ export default function TicketPage() {
                   </div>
                 )}
 
+                {/* Promo Code Input */}
+                <div className="mb-4">
+                  <p className="text-sm font-medium text-gray-700 mb-2">プロモーションコード</p>
+                  <PromoCodeInput
+                    onApply={(code) => setAppliedPromoCode(code)}
+                    onClear={() => setAppliedPromoCode(null)}
+                  />
+                </div>
+
                 <div className="border-t border-gray-200 pt-4 space-y-2">
                   <div className="flex justify-between text-sm">
                     <span>小計</span>
                     <span>{formatPrice(subtotal)}</span>
                   </div>
+                  {discount > 0 && (
+                    <div className="flex justify-between text-sm text-green-600">
+                      <span>割引（{appliedPromoCode?.name}）</span>
+                      <span>-{formatPrice(discount)}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between text-sm">
                     <span>消費税（10%）</span>
                     <span>{formatPrice(tax)}</span>
