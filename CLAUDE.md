@@ -174,12 +174,20 @@ User（ユーザー）
 ├── id, email, name, role (purchaser/attendee)
 │
 Order（注文）
-├── id, user_id, status, payment_intent_id, created_at
+├── id, user_id, status, payment_intent_id, promo_code_id, created_at
 │
 Ticket（チケット）
 ├── id, order_id, ticket_type, assigned_to (user_id)
 ├── status (unassigned/invited/registered)
 ├── invite_token, invite_email
+│
+PromoCode（プロモーションコード）
+├── id, code, name, discount_type, fixed_price
+├── max_total_uses, max_uses_per_user
+├── category, is_active, valid_from, valid_until
+│
+PromoCodeUse（使用履歴）
+├── id, promo_code_id, user_id, order_id, used_at
 │
 Session（セッション）※MicroCMSで管理
 ├── id, title, speaker, description, video_id
@@ -234,6 +242,92 @@ freee APIで領収書作成・送信
     ↓
 Supabaseの注文ステータスを更新
 ```
+
+## Promo Code System（プロモーションコード）
+
+### 割引タイプ
+
+| discount_type | 説明 | 適用ロジック |
+|---------------|------|--------------|
+| `free_all` | 全チケット無料 | 金額を0円に |
+| `member_price` | 会員価格適用 | 会員価格に変更 |
+| `free_venue` | 会場参加無料 | 会場分を0円に |
+| `free_ondemand` | オンデマンド無料 | オンデマンド分を0円に |
+| `exclude_party` | パーティー以外無料 | パーティー代のみ請求 |
+| `fixed_price` | 固定価格 | 指定金額に変更 |
+
+### カテゴリ分類
+
+| category | 対象 | 例 |
+|----------|------|-----|
+| `member` | JTF会員 | 個人会員、法人会員 |
+| `sponsor` | スポンサー | ダイヤモンド、ゴールド、シルバー |
+| `speaker` | 登壇者 | 会場登壇、オンデマンド登壇 |
+| `partner` | 後援・提携団体 | TC協会、IR協議会、JEMIMA |
+| `school` | 教育機関 | 横浜国立大学、翻訳学校 |
+| `staff` | 事務局・委員 | 事務局、委員 |
+| `test` | テスト用 | 決済テスト |
+
+### データベース設計
+
+```sql
+-- プロモーションコード
+CREATE TABLE promo_codes (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  code VARCHAR(50) UNIQUE NOT NULL,        -- コード文字列
+  name VARCHAR(100) NOT NULL,              -- 表示名
+  description TEXT,                        -- 備考
+
+  -- 割引タイプ
+  discount_type VARCHAR(50) NOT NULL,      -- 上記タイプ
+  fixed_price INTEGER,                     -- fixed_price時の金額（円）
+
+  -- 使用制限
+  max_total_uses INTEGER,                  -- 総使用回数上限（NULL=無制限）
+  max_uses_per_user INTEGER DEFAULT 1,     -- 1人あたり使用回数
+
+  -- 対象チケット（NULL=全チケット対象）
+  applicable_ticket_types TEXT[],          -- ['venue', 'online', 'party', 'full']
+
+  -- 有効期間
+  valid_from TIMESTAMP,
+  valid_until TIMESTAMP,
+
+  -- メタ情報
+  category VARCHAR(50),                    -- カテゴリ
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- 使用履歴
+CREATE TABLE promo_code_uses (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  promo_code_id UUID REFERENCES promo_codes(id),
+  user_id UUID REFERENCES users(id),
+  order_id UUID REFERENCES orders(id),
+  used_at TIMESTAMP DEFAULT NOW()
+);
+```
+
+### コード例（2026年度）
+
+| コード | 名前 | 割引 | 制限 |
+|--------|------|------|------|
+| JTF2026-PERSONAL | JTF個人会員用 | 会員価格 | 1人1回 |
+| JTF2026-CORP | JTF法人会員用 | 会員価格 | 無制限 |
+| SPEAKER-2026 | 登壇者用 | 全額無料 | 1人1回 |
+| DIAMOND-XXXX | ダイヤモンドスポンサー | 全額無料 | 3名まで |
+| GOLD-XXXX | ゴールドスポンサー | 全額無料 | 2名まで |
+| SILVER-XXXX | シルバースポンサー | 全額無料 | 1名まで |
+| STUDENT-2026 | 学生プロモーション | 会員価格 | 1人1回 |
+| TEST2026 | テスト用 | 1,000円固定 | 無制限 |
+
+### 管理画面機能
+
+- プロモーションコードのCRUD
+- CSVインポート/エクスポート
+- 使用状況の確認（使用数/上限）
+- 有効/無効の切り替え
 
 ## Cost Optimization（コスト最適化方針）
 
