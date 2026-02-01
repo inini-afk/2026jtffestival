@@ -200,16 +200,121 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Big Text / Tagline Section */}
-      <section className="py-40 px-6 text-center">
-        <div className="max-w-5xl mx-auto">
-          <h2 className="text-4xl md:text-7xl font-bold tracking-tighter leading-tight">
-            Simple.
-            <br />
-            Powerful.
-            <br />
-            <span className="text-gradient-blue">Connected.</span>
-          </h2>
+      {/* Sponsors Section */}
+      <section className="py-32 px-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <p className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">
+              Special Thanks to
+            </p>
+            <h2 className="text-3xl md:text-5xl font-bold tracking-tight">
+              Sponsors
+            </h2>
+          </div>
+
+          {/* Diamond Sponsors */}
+          <div className="mb-16">
+            <div className="flex items-center justify-center gap-3 mb-8">
+              <div className="h-px flex-1 max-w-20 bg-gradient-to-r from-transparent to-cyan-300"></div>
+              <span className="text-sm font-bold uppercase tracking-widest bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 bg-clip-text text-transparent">
+                Diamond
+              </span>
+              <div className="h-px flex-1 max-w-20 bg-gradient-to-l from-transparent to-purple-300"></div>
+            </div>
+            <div className="flex flex-wrap justify-center gap-8">
+              {/* Diamond sponsor placeholders - largest size */}
+              <SponsorLogo
+                tier="diamond"
+                name="ダイヤモンドスポンサー A"
+                logo="/sponsors/diamond/sponsor-a.png"
+              />
+              <SponsorLogo
+                tier="diamond"
+                name="ダイヤモンドスポンサー B"
+                logo="/sponsors/diamond/sponsor-b.png"
+              />
+            </div>
+          </div>
+
+          {/* Gold Sponsors */}
+          <div className="mb-16">
+            <div className="flex items-center justify-center gap-3 mb-8">
+              <div className="h-px flex-1 max-w-16 bg-gradient-to-r from-transparent to-amber-300"></div>
+              <span className="text-sm font-bold uppercase tracking-widest text-amber-500">
+                Gold
+              </span>
+              <div className="h-px flex-1 max-w-16 bg-gradient-to-l from-transparent to-amber-300"></div>
+            </div>
+            <div className="flex flex-wrap justify-center gap-6">
+              {/* Gold sponsor placeholders - medium size */}
+              <SponsorLogo
+                tier="gold"
+                name="ゴールドスポンサー A"
+                logo="/sponsors/gold/sponsor-a.png"
+              />
+              <SponsorLogo
+                tier="gold"
+                name="ゴールドスポンサー B"
+                logo="/sponsors/gold/sponsor-b.png"
+              />
+              <SponsorLogo
+                tier="gold"
+                name="ゴールドスポンサー C"
+                logo="/sponsors/gold/sponsor-c.png"
+              />
+            </div>
+          </div>
+
+          {/* Silver Sponsors */}
+          <div>
+            <div className="flex items-center justify-center gap-3 mb-8">
+              <div className="h-px flex-1 max-w-12 bg-gradient-to-r from-transparent to-gray-300"></div>
+              <span className="text-sm font-bold uppercase tracking-widest text-gray-400">
+                Silver
+              </span>
+              <div className="h-px flex-1 max-w-12 bg-gradient-to-l from-transparent to-gray-300"></div>
+            </div>
+            <div className="flex flex-wrap justify-center gap-4">
+              {/* Silver sponsor placeholders - smaller size */}
+              <SponsorLogo
+                tier="silver"
+                name="シルバースポンサー A"
+                logo="/sponsors/silver/sponsor-a.png"
+              />
+              <SponsorLogo
+                tier="silver"
+                name="シルバースポンサー B"
+                logo="/sponsors/silver/sponsor-b.png"
+              />
+              <SponsorLogo
+                tier="silver"
+                name="シルバースポンサー C"
+                logo="/sponsors/silver/sponsor-c.png"
+              />
+              <SponsorLogo
+                tier="silver"
+                name="シルバースポンサー D"
+                logo="/sponsors/silver/sponsor-d.png"
+              />
+              <SponsorLogo
+                tier="silver"
+                name="シルバースポンサー E"
+                logo="/sponsors/silver/sponsor-e.png"
+              />
+            </div>
+          </div>
+
+          {/* Become a Sponsor CTA */}
+          <div className="text-center mt-16 pt-12 border-t border-gray-100">
+            <p className="text-gray-500 mb-4">スポンサーシップについてのお問い合わせ</p>
+            <a
+              href="mailto:sponsor@jtf.jp"
+              className="inline-flex items-center gap-2 text-blue-600 font-medium hover:underline"
+            >
+              sponsor@jtf.jp
+              <i className="fas fa-arrow-right text-xs"></i>
+            </a>
+          </div>
         </div>
       </section>
 
@@ -265,4 +370,78 @@ function InfoRow({ label, value }: { label: string; value: string }) {
       <span className="text-xl font-bold mt-2 md:mt-0">{value}</span>
     </div>
   );
+}
+
+function SponsorLogo({
+  tier,
+  name,
+  logo,
+  url,
+}: {
+  tier: "diamond" | "gold" | "silver";
+  name: string;
+  logo: string;
+  url?: string;
+}) {
+  const sizeClasses = {
+    diamond: "w-64 h-32 md:w-80 md:h-40",
+    gold: "w-48 h-24 md:w-56 md:h-28",
+    silver: "w-36 h-18 md:w-44 md:h-22",
+  };
+
+  const containerClasses = {
+    diamond:
+      "bg-gradient-to-br from-slate-50 via-white to-blue-50 border-2 border-transparent bg-clip-padding shadow-lg shadow-blue-100/50 hover:shadow-xl hover:shadow-blue-200/50 hover:scale-105",
+    gold:
+      "bg-gradient-to-br from-amber-50/50 via-white to-yellow-50/50 border border-amber-100/50 shadow-md hover:shadow-lg hover:shadow-amber-100/50 hover:scale-105",
+    silver:
+      "bg-white border border-gray-100 shadow-sm hover:shadow-md hover:scale-105",
+  };
+
+  const content = (
+    <div
+      className={`
+        ${sizeClasses[tier]}
+        ${containerClasses[tier]}
+        rounded-2xl p-4 md:p-6
+        flex items-center justify-center
+        transition-all duration-300 ease-out
+        group cursor-pointer
+      `}
+      title={name}
+    >
+      {/* Placeholder - replace with actual Image component when logos are available */}
+      <div className="flex flex-col items-center justify-center text-center">
+        <div
+          className={`
+            ${tier === "diamond" ? "w-16 h-16 md:w-20 md:h-20" : tier === "gold" ? "w-12 h-12 md:w-14 md:h-14" : "w-10 h-10 md:w-12 md:h-12"}
+            rounded-xl bg-gray-100 flex items-center justify-center mb-2
+            group-hover:bg-gray-200 transition-colors
+          `}
+        >
+          <i
+            className={`fas fa-building ${tier === "diamond" ? "text-2xl md:text-3xl" : tier === "gold" ? "text-xl md:text-2xl" : "text-lg md:text-xl"} text-gray-300`}
+          ></i>
+        </div>
+        <span
+          className={`
+            ${tier === "diamond" ? "text-xs md:text-sm" : "text-xs"}
+            text-gray-400 font-medium truncate max-w-full px-2
+          `}
+        >
+          {name}
+        </span>
+      </div>
+    </div>
+  );
+
+  if (url) {
+    return (
+      <a href={url} target="_blank" rel="noopener noreferrer">
+        {content}
+      </a>
+    );
+  }
+
+  return content;
 }
