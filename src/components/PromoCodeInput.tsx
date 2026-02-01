@@ -1,25 +1,40 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { usePromoCode, getDiscountDescription } from "@/lib/hooks/usePromoCode";
 
 interface PromoCodeInputProps {
   onApply?: (promoCode: ReturnType<typeof usePromoCode>["promoCode"]) => void;
   onClear?: () => void;
+  initialCode?: ReturnType<typeof usePromoCode>["promoCode"];
 }
 
-export function PromoCodeInput({ onApply, onClear }: PromoCodeInputProps) {
+export function PromoCodeInput({ onApply, onClear, initialCode }: PromoCodeInputProps) {
   const [inputValue, setInputValue] = useState("");
-  const { promoCode, isLoading, error, validateCode, clearPromoCode } =
+  const { promoCode, isLoading, error, validateCode, clearPromoCode, setPromoCodeDirectly } =
     usePromoCode();
+  const prevPromoCodeRef = useRef(promoCode);
+  const initializedRef = useRef(false);
+
+  // Apply initial code if provided (e.g., restored from localStorage)
+  useEffect(() => {
+    if (initialCode && !initializedRef.current && !promoCode) {
+      setPromoCodeDirectly(initialCode);
+      initializedRef.current = true;
+    }
+  }, [initialCode, promoCode, setPromoCodeDirectly]);
+
+  // Call onApply when promoCode changes (using useEffect to avoid setState during render)
+  useEffect(() => {
+    if (promoCode && promoCode !== prevPromoCodeRef.current && onApply) {
+      onApply(promoCode);
+    }
+    prevPromoCodeRef.current = promoCode;
+  }, [promoCode, onApply]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const isValid = await validateCode(inputValue);
-    if (isValid && onApply) {
-      // promoCode will be set after validateCode succeeds
-      // We need to get it from the hook after state updates
-    }
+    await validateCode(inputValue);
   };
 
   const handleClear = () => {
@@ -27,11 +42,6 @@ export function PromoCodeInput({ onApply, onClear }: PromoCodeInputProps) {
     clearPromoCode();
     onClear?.();
   };
-
-  // Call onApply when promoCode changes
-  if (promoCode && onApply) {
-    onApply(promoCode);
-  }
 
   return (
     <div className="w-full">

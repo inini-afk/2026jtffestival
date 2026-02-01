@@ -52,7 +52,12 @@ export default function Navigation() {
   const getMypageLink = () => {
     if (!user) return { href: "/login", label: "ログイン" };
 
-    // If user has purchaser role, show purchaser mypage
+    // While roles are loading, default to /mypage
+    if (roles.length === 0) {
+      return { href: "/mypage", label: "マイページ" };
+    }
+
+    // If user has purchaser role (even if also attendee), show purchaser mypage
     if (roles.includes("purchaser")) {
       return { href: "/mypage", label: "マイページ" };
     }
@@ -62,7 +67,7 @@ export default function Navigation() {
       return { href: "/attendee", label: "マイページ" };
     }
 
-    // Default to login if no roles yet
+    // Default to mypage
     return { href: "/mypage", label: "マイページ" };
   };
 

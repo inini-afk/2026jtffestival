@@ -14,6 +14,7 @@ export default function RegisterPage() {
     confirmPassword: "",
     name: "",
     company: "",
+    accountType: "individual" as "individual" | "company",
   });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -60,6 +61,12 @@ export default function RegisterPage() {
       return;
     }
 
+    if (formData.accountType === "company" && !formData.company.trim()) {
+      setError("法人アカウントの場合、会社名は必須です");
+      setLoading(false);
+      return;
+    }
+
     const supabase = createClient();
 
     const { error } = await supabase.auth.signUp({
@@ -69,6 +76,7 @@ export default function RegisterPage() {
         data: {
           name: formData.name,
           company: formData.company,
+          account_type: formData.accountType,
         },
       },
     });
@@ -200,11 +208,65 @@ export default function RegisterPage() {
             </div>
 
             <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                アカウントタイプ <span className="text-red-500">*</span>
+              </label>
+              <div className="grid grid-cols-2 gap-3">
+                <label
+                  className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 cursor-pointer transition-all ${
+                    formData.accountType === "individual"
+                      ? "border-blue-500 bg-blue-50 text-blue-700"
+                      : "border-gray-200 hover:border-gray-300"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="accountType"
+                    value="individual"
+                    checked={formData.accountType === "individual"}
+                    onChange={handleChange}
+                    className="sr-only"
+                  />
+                  <i className="fas fa-user text-sm"></i>
+                  <span className="font-medium">個人</span>
+                </label>
+                <label
+                  className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 cursor-pointer transition-all ${
+                    formData.accountType === "company"
+                      ? "border-blue-500 bg-blue-50 text-blue-700"
+                      : "border-gray-200 hover:border-gray-300"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="accountType"
+                    value="company"
+                    checked={formData.accountType === "company"}
+                    onChange={handleChange}
+                    className="sr-only"
+                  />
+                  <i className="fas fa-building text-sm"></i>
+                  <span className="font-medium">法人</span>
+                </label>
+              </div>
+              {formData.accountType === "company" && (
+                <p className="text-xs text-blue-600 mt-2">
+                  法人アカウントでは請求書払いがご利用いただけます
+                </p>
+              )}
+            </div>
+
+            <div>
               <label
                 htmlFor="company"
                 className="block text-sm font-medium text-gray-700 mb-2"
               >
-                会社名・所属（任意）
+                会社名・所属
+                {formData.accountType === "company" ? (
+                  <span className="text-red-500"> *</span>
+                ) : (
+                  <span className="text-gray-400">（任意）</span>
+                )}
               </label>
               <input
                 id="company"
@@ -212,6 +274,7 @@ export default function RegisterPage() {
                 type="text"
                 value={formData.company}
                 onChange={handleChange}
+                required={formData.accountType === "company"}
                 className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
                 placeholder="株式会社○○"
               />

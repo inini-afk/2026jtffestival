@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import type { PromoCategory } from "@/types";
 
 // Check if user is admin
 async function isAdmin(supabase: Awaited<ReturnType<typeof createClient>>, userId: string) {
@@ -41,7 +42,7 @@ export async function GET(request: NextRequest) {
       .order("created_at", { ascending: false });
 
     if (category) {
-      query = query.eq("category", category);
+      query = query.eq("category", category as PromoCategory);
     }
 
     if (active !== null) {

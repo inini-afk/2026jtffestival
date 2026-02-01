@@ -1,18 +1,21 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useAuth } from "@/lib/hooks";
-import { getProfile, getDashboardStats, getOrders } from "@/lib/services";
+import { getProfile, getDashboardStats, getOrders, getAssignedTickets } from "@/lib/services";
+import type { TicketWithType, OrderWithDetails } from "@/lib/services/profile";
 import { Navigation, BackgroundOrbs } from "@/components";
-import type { Profile, Order } from "@/types";
+import type { Profile } from "@/types";
 
-export default function MyPage() {
+function MyPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user, loading, signOut } = useAuth();
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [orders, setOrders] = useState<Order[]>([]);
+  const [orders, setOrders] = useState<OrderWithDetails[]>([]);
+  const [myTickets, setMyTickets] = useState<TicketWithType[]>([]);
   const [stats, setStats] = useState({
     totalTickets: 0,
     invitedTickets: 0,
@@ -20,20 +23,24 @@ export default function MyPage() {
   });
   const [dataLoading, setDataLoading] = useState(true);
 
+  const isWelcome = searchParams.get("welcome") === "true";
+
   useEffect(() => {
     async function loadData() {
       if (!user) return;
 
       try {
-        const [profileData, statsData, ordersData] = await Promise.all([
+        const [profileData, statsData, ordersData, assignedTickets] = await Promise.all([
           getProfile(),
           getDashboardStats(),
           getOrders(),
+          getAssignedTickets(),
         ]);
 
         setProfile(profileData);
         setStats(statsData);
         setOrders(ordersData);
+        setMyTickets(assignedTickets);
       } catch (error) {
         console.error("Error loading data:", error);
       } finally {
@@ -85,27 +92,80 @@ export default function MyPage() {
     }).format(price);
   };
 
-  // Get status badge
-  const getStatusBadge = (status: string) => {
-    const styles: Record<string, string> = {
-      pending: "bg-yellow-100 text-yellow-800",
-      paid: "bg-green-100 text-green-800",
-      cancelled: "bg-gray-100 text-gray-800",
-      refunded: "bg-red-100 text-red-800",
+  // Get status info based on order status and payment method
+  const getOrderStatusInfo = (order: OrderWithDetails) => {
+    if (order.status === "paid") {
+      return {
+        badge: "bg-green-100 text-green-800",
+        label: "支払完了",
+        icon: "✅",
+        message: null,
+        action: null,
+      };
+    }
+
+    if (order.status === "pending") {
+      // Bank transfer pending
+      if (order.payment_method === "bank_transfer") {
+        return {
+          badge: "bg-yellow-100 text-yellow-800",
+          label: "振込待ち",
+          icon: "⏳",
+          message: "銀行振込をお待ちしています（7日以内）",
+          action: {
+            label: "振込情報を確認",
+            href: `/mypage/orders/${order.id}`,
+            style: "bg-yellow-500 hover:bg-yellow-600 text-white",
+          },
+        };
+      }
+
+      // Invoice pending
+      if (order.payment_method === "invoice") {
+        return {
+          badge: "bg-purple-100 text-purple-800",
+          label: "請求書発行済",
+          icon: "📄",
+          message: "請求書をご確認ください（翌月末まで）",
+          action: order.stripe_invoice_id ? {
+            label: "請求書を開く",
+            href: `/mypage/orders/${order.id}`,
+            style: "bg-purple-500 hover:bg-purple-600 text-white",
+          } : null,
+        };
+      }
+
+      // Card payment pending (possibly failed)
+      return {
+        badge: "bg-red-100 text-red-800",
+        label: "決済未完了",
+        icon: "⚠️",
+        message: "決済が完了していません",
+        action: {
+          label: "再試行する",
+          href: "/ticket",
+          style: "bg-red-500 hover:bg-red-600 text-white",
+        },
+      };
+    }
+
+    if (order.status === "refunded") {
+      return {
+        badge: "bg-gray-100 text-gray-800",
+        label: "返金済み",
+        icon: "↩️",
+        message: null,
+        action: null,
+      };
+    }
+
+    return {
+      badge: "bg-gray-100 text-gray-800",
+      label: order.status,
+      icon: "❓",
+      message: null,
+      action: null,
     };
-    const labels: Record<string, string> = {
-      pending: "支払い待ち",
-      paid: "支払い済み",
-      cancelled: "キャンセル",
-      refunded: "返金済み",
-    };
-    return (
-      <span
-        className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${styles[status] || styles.pending}`}
-      >
-        {labels[status] || status}
-      </span>
-    );
   };
 
   return (
@@ -115,6 +175,21 @@ export default function MyPage() {
 
       <main className="pt-24 pb-20 px-6">
         <div className="max-w-4xl mx-auto">
+          {/* Welcome Message */}
+          {isWelcome && (
+            <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl text-green-700 flex items-center gap-3">
+              <svg className="w-6 h-6 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+              <div>
+                <p className="font-bold">登録完了</p>
+                <p className="text-sm">
+                  チケットを受け取りました。JTF翻訳祭2026へようこそ！
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* User Header */}
           <div className="info-card rounded-3xl p-8 mb-8">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -225,47 +300,151 @@ export default function MyPage() {
             </Link>
           </div>
 
+          {/* My Tickets (Assigned to me) */}
+          {myTickets.length > 0 && (
+            <div className="mt-8">
+              <h2 className="text-xl font-bold mb-4">
+                あなたのチケット（{myTickets.length}枚）
+              </h2>
+              <div className="space-y-4">
+                {myTickets.map((ticket) => (
+                  <div
+                    key={ticket.id}
+                    className="info-card rounded-2xl p-6"
+                  >
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                      <div>
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="font-mono text-sm text-gray-500">
+                            {ticket.ticket_number}
+                          </span>
+                          <span className="inline-block px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
+                            有効
+                          </span>
+                        </div>
+                        <h3 className="text-lg font-bold">
+                          {ticket.ticket_type?.name}
+                        </h3>
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {ticket.ticket_type?.includes_onsite && (
+                            <span className="inline-block px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">
+                              会場参加
+                            </span>
+                          )}
+                          {ticket.ticket_type?.includes_online && (
+                            <span className="inline-block px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full">
+                              オンデマンド視聴
+                            </span>
+                          )}
+                          {ticket.ticket_type?.includes_party && (
+                            <span className="inline-block px-2 py-1 bg-pink-100 text-pink-700 text-xs rounded-full">
+                              交流パーティー
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Order History */}
           {orders.length > 0 ? (
             <div className="mt-8">
               <h2 className="text-xl font-bold mb-4">注文履歴</h2>
               <div className="space-y-4">
-                {orders.map((order) => (
-                  <div
-                    key={order.id}
-                    className="info-card rounded-2xl p-6"
-                  >
-                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                      <div>
-                        <div className="flex items-center gap-3 mb-2">
-                          <span className="font-mono text-sm text-gray-500">
-                            {order.order_number}
-                          </span>
-                          {getStatusBadge(order.status)}
+                {orders.map((order) => {
+                  const statusInfo = getOrderStatusInfo(order);
+                  return (
+                    <div
+                      key={order.id}
+                      className="info-card rounded-2xl p-6"
+                    >
+                      {/* Order Header */}
+                      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <span className="font-mono text-sm text-gray-500">
+                              {order.order_number}
+                            </span>
+                            <span className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${statusInfo.badge}`}>
+                              {statusInfo.icon} {statusInfo.label}
+                            </span>
+                          </div>
+                          <div className="text-sm text-gray-500 mb-3">
+                            {formatDate(order.created_at)}
+                          </div>
+
+                          {/* Order Items */}
+                          <div className="space-y-1">
+                            {order.order_items.map((item) => (
+                              <div key={item.id} className="text-sm">
+                                <span className="font-medium">{item.ticket_type?.name}</span>
+                                <span className="text-gray-500"> × {item.quantity}</span>
+                              </div>
+                            ))}
+                          </div>
                         </div>
-                        <div className="text-sm text-gray-500">
-                          {formatDate(order.created_at)}
+
+                        <div className="text-right">
+                          <div className="text-xl font-bold">
+                            {formatPrice(order.total)}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            （税込）
+                          </div>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <div className="text-xl font-bold">
-                          {formatPrice(order.total)}
+
+                      {/* Status Message & Action */}
+                      {(statusInfo.message || statusInfo.action) && (
+                        <div className="mt-4 pt-4 border-t border-gray-100">
+                          <div className={`p-3 rounded-xl ${
+                            order.status === "paid"
+                              ? "bg-green-50"
+                              : order.status === "pending" && order.payment_method === "bank_transfer"
+                              ? "bg-yellow-50"
+                              : order.status === "pending" && order.payment_method === "invoice"
+                              ? "bg-purple-50"
+                              : "bg-red-50"
+                          }`}>
+                            {statusInfo.message && (
+                              <p className="text-sm mb-2">{statusInfo.message}</p>
+                            )}
+                            {statusInfo.action && (
+                              <Link
+                                href={statusInfo.action.href}
+                                className={`inline-block px-4 py-2 rounded-lg text-sm font-medium transition-colors ${statusInfo.action.style}`}
+                              >
+                                {statusInfo.action.label}
+                              </Link>
+                            )}
+                          </div>
                         </div>
-                        <div className="text-sm text-gray-500">
-                          （税込）
+                      )}
+
+                      {/* Paid Order Actions */}
+                      {order.status === "paid" && (
+                        <div className="mt-4 pt-4 border-t border-gray-100 flex justify-between items-center">
+                          <Link
+                            href={`/mypage/orders/${order.id}`}
+                            className="text-sm text-blue-600 hover:text-blue-800"
+                          >
+                            詳細を見る →
+                          </Link>
+                          <Link
+                            href={`/mypage/orders/${order.id}`}
+                            className="text-sm bg-blue-100 text-blue-700 px-3 py-1.5 rounded-lg hover:bg-blue-200 transition-colors"
+                          >
+                            チケットを管理
+                          </Link>
                         </div>
-                      </div>
+                      )}
                     </div>
-                    <div className="mt-4 pt-4 border-t border-gray-100 flex justify-end">
-                      <Link
-                        href={`/mypage/orders/${order.id}`}
-                        className="text-sm text-blue-600 hover:text-blue-800"
-                      >
-                        詳細を見る →
-                      </Link>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           ) : (
@@ -286,5 +465,19 @@ export default function MyPage() {
         </div>
       </main>
     </>
+  );
+}
+
+export default function MyPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        </div>
+      }
+    >
+      <MyPageContent />
+    </Suspense>
   );
 }

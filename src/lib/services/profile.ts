@@ -1,5 +1,8 @@
 import { createClient } from "@/lib/supabase/client";
-import type { Profile, Order, Ticket, OrderItem, TicketType } from "@/types";
+import type { Profile, Order, Ticket, OrderItem, TicketType, TicketWithDetails } from "@/types";
+import type { TicketWithType } from "./ticket";
+
+export type { TicketWithType };
 
 export interface OrderWithDetails extends Order {
   order_items: (OrderItem & { ticket_type: TicketType })[];
@@ -63,9 +66,9 @@ export async function updateProfile(updates: {
 }
 
 /**
- * Get the current user's orders with items
+ * Get the current user's orders with items (all statuses except cancelled)
  */
-export async function getOrders(): Promise<Order[]> {
+export async function getOrders(): Promise<OrderWithDetails[]> {
   const supabase = createClient();
 
   const {
@@ -74,18 +77,54 @@ export async function getOrders(): Promise<Order[]> {
 
   if (!user) return [];
 
-  const { data, error } = await supabase
+  // Get orders (exclude cancelled orders)
+  const { data: orders, error: ordersError } = await supabase
     .from("orders")
     .select("*")
     .eq("purchaser_id", user.id)
+    .neq("status", "cancelled")
     .order("created_at", { ascending: false });
 
-  if (error) {
-    console.error("Error fetching orders:", error);
+  if (ordersError || !orders) {
+    console.error("Error fetching orders:", ordersError);
     return [];
   }
 
-  return data || [];
+  // Get order items with ticket types for all orders
+  const orderIds = orders.map((o) => o.id);
+  if (orderIds.length === 0) return [];
+
+  const { data: orderItems, error: itemsError } = await supabase
+    .from("order_items")
+    .select("*, ticket_types(*)")
+    .in("order_id", orderIds);
+
+  if (itemsError) {
+    console.error("Error fetching order items:", itemsError);
+    return [];
+  }
+
+  // Get tickets for all orders
+  const { data: tickets, error: ticketsError } = await supabase
+    .from("tickets")
+    .select("*")
+    .in("order_id", orderIds);
+
+  if (ticketsError) {
+    console.error("Error fetching tickets:", ticketsError);
+  }
+
+  // Combine data
+  return orders.map((order) => ({
+    ...order,
+    order_items: (orderItems || [])
+      .filter((item) => item.order_id === order.id)
+      .map((item) => ({
+        ...item,
+        ticket_type: item.ticket_types as unknown as TicketType,
+      })),
+    tickets: (tickets || []).filter((t) => t.order_id === order.id),
+  }));
 }
 
 /**
@@ -115,9 +154,9 @@ export async function getPurchasedTickets(): Promise<Ticket[]> {
 }
 
 /**
- * Get tickets assigned to the current user (as attendee)
+ * Get tickets assigned to the current user (as attendee) with ticket type info
  */
-export async function getAssignedTickets(): Promise<Ticket[]> {
+export async function getAssignedTickets(): Promise<TicketWithType[]> {
   const supabase = createClient();
 
   const {
@@ -128,7 +167,7 @@ export async function getAssignedTickets(): Promise<Ticket[]> {
 
   const { data, error } = await supabase
     .from("tickets")
-    .select("*")
+    .select("*, ticket_types(*)")
     .eq("attendee_id", user.id)
     .order("created_at", { ascending: false });
 
@@ -137,7 +176,10 @@ export async function getAssignedTickets(): Promise<Ticket[]> {
     return [];
   }
 
-  return data || [];
+  return (data || []).map((t) => ({
+    ...t,
+    ticket_type: t.ticket_types as unknown as TicketType,
+  }));
 }
 
 /**

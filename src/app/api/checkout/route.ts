@@ -1,11 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { getStripeServer } from "@/lib/stripe";
+import { getStripeServer, getOrCreateStripeCustomer } from "@/lib/stripe";
+import type { PaymentMethod } from "@/types";
+import Stripe from "stripe";
 
 interface CheckoutItem {
   ticketTypeId: string;
   quantity: number;
 }
+
+interface CompanyInfo {
+  companyName: string;
+  companyCountry: string;
+  companyPostalCode?: string;
+  companyAddress: string;
+  companyPhone: string;
+}
+
+type CheckoutPaymentMethod = "card" | "bank_transfer" | "invoice";
 
 export async function POST(request: NextRequest) {
   try {
@@ -26,13 +38,95 @@ export async function POST(request: NextRequest) {
 
     // Parse request body
     const body = await request.json();
-    const { items, promoCodeId } = body as { items: CheckoutItem[]; promoCodeId?: string };
+    const { items, promoCodeId, paymentMethod = "card", companyInfo } = body as {
+      items: CheckoutItem[];
+      promoCodeId?: string;
+      paymentMethod?: CheckoutPaymentMethod;
+      companyInfo?: CompanyInfo;
+    };
+
+    // Validate invoice payment requirements
+    if (paymentMethod === "invoice") {
+      // Get user profile to check account type
+      const { data: profileCheck } = await supabase
+        .from("profiles")
+        .select("account_type, company")
+        .eq("id", user.id)
+        .single();
+
+      if (profileCheck?.account_type !== "company") {
+        return NextResponse.json(
+          { error: "請求書払いは法人のみご利用いただけます" },
+          { status: 400 }
+        );
+      }
+
+      if (!companyInfo?.companyName || !companyInfo?.companyAddress || !companyInfo?.companyPhone) {
+        return NextResponse.json(
+          { error: "請求書払いには請求書宛先、所在地、電話番号が必要です" },
+          { status: 400 }
+        );
+      }
+    }
 
     if (!items || items.length === 0) {
       return NextResponse.json(
         { error: "カートが空です" },
         { status: 400 }
       );
+    }
+
+    // Get user profile for account type check
+    const { data: userProfile } = await supabase
+      .from("profiles")
+      .select("account_type")
+      .eq("id", user.id)
+      .single();
+
+    // Individual accounts can only purchase 1 ticket total
+    if (userProfile?.account_type !== "company") {
+      // Count tickets in current cart
+      const cartTicketCount = items.reduce((sum, item) => sum + item.quantity, 0);
+
+      if (cartTicketCount > 1) {
+        return NextResponse.json(
+          { error: "個人アカウントは1枚のみ購入可能です。複数枚購入するには法人アカウントに変更してください。" },
+          { status: 400 }
+        );
+      }
+
+      // Check if user already has purchased tickets (paid or pending orders)
+      const { count: existingTicketCount } = await supabase
+        .from("tickets")
+        .select("*", { count: "exact", head: true })
+        .eq("purchaser_id", user.id);
+
+      // Also check pending orders (tickets not yet created)
+      const { data: pendingOrders } = await supabase
+        .from("orders")
+        .select("id")
+        .eq("purchaser_id", user.id)
+        .eq("status", "pending");
+
+      let pendingTicketCount = 0;
+      if (pendingOrders && pendingOrders.length > 0) {
+        const pendingOrderIds = pendingOrders.map((o) => o.id);
+        const { data: pendingItems } = await supabase
+          .from("order_items")
+          .select("quantity")
+          .in("order_id", pendingOrderIds);
+
+        pendingTicketCount = pendingItems?.reduce((sum, item) => sum + item.quantity, 0) || 0;
+      }
+
+      const totalExistingTickets = (existingTicketCount || 0) + pendingTicketCount;
+
+      if (totalExistingTickets > 0) {
+        return NextResponse.json(
+          { error: "個人アカウントは1枚のみ購入可能です。既にチケットをお持ちです。" },
+          { status: 400 }
+        );
+      }
     }
 
     // Validate promo code if provided
@@ -148,13 +242,18 @@ export async function POST(request: NextRequest) {
     const tax = Math.floor(discountedSubtotal * 0.1);
     const total = discountedSubtotal + tax;
 
+    // Map checkout payment method to database payment method
+    const dbPaymentMethod: PaymentMethod =
+      paymentMethod === "bank_transfer" ? "bank_transfer" :
+      paymentMethod === "invoice" ? "invoice" : "card";
+
     // Create order in database (pending status)
     const { data: order, error: orderError } = await supabase
       .from("orders")
       .insert({
         purchaser_id: user.id,
         status: "pending",
-        payment_method: "card",
+        payment_method: dbPaymentMethod,
         subtotal: discountedSubtotal,
         tax,
         total,
@@ -242,29 +341,176 @@ export async function POST(request: NextRequest) {
 
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || request.nextUrl.origin;
 
-    const session = await stripe.checkout.sessions.create({
+    // Get user profile for name and company info
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("name, company, account_type, company_country, company_postal_code, company_address, company_phone, company_registration_number")
+      .eq("id", user.id)
+      .single();
+
+    // Get or create Stripe Customer
+    const stripeCustomerId = await getOrCreateStripeCustomer(
+      user.id,
+      user.email || "",
+      profile?.name || undefined
+    );
+
+    // Handle invoice payment separately
+    if (paymentMethod === "invoice") {
+      // Update company info in profile if provided
+      if (companyInfo) {
+        await supabase
+          .from("profiles")
+          .update({
+            account_type: "company",
+            company: companyInfo.companyName,
+            company_country: companyInfo.companyCountry,
+            company_postal_code: companyInfo.companyPostalCode || null,
+            company_address: companyInfo.companyAddress,
+            company_phone: companyInfo.companyPhone,
+          })
+          .eq("id", user.id);
+      }
+
+      // Build address for Stripe
+      const stripeAddress: Stripe.AddressParam = {
+        line1: companyInfo?.companyAddress || profile?.company_address || "",
+        country: companyInfo?.companyCountry || profile?.company_country || "JP",
+      };
+      if (companyInfo?.companyPostalCode || profile?.company_postal_code) {
+        stripeAddress.postal_code = companyInfo?.companyPostalCode || profile?.company_postal_code || undefined;
+      }
+
+      // Update Stripe Customer with company information and Japanese locale
+      await stripe.customers.update(stripeCustomerId, {
+        name: companyInfo?.companyName || profile?.company || profile?.name || undefined,
+        address: stripeAddress,
+        phone: companyInfo?.companyPhone || profile?.company_phone || undefined,
+        preferred_locales: ["ja"], // Japanese invoices
+      });
+
+      // Calculate due date (end of next month)
+      const now = new Date();
+      const nextMonth = new Date(now.getFullYear(), now.getMonth() + 2, 0); // Last day of next month
+      const dueDate = Math.floor(nextMonth.getTime() / 1000);
+
+      // Create invoice items
+      for (const item of items) {
+        const ticketType = ticketTypeMap.get(item.ticketTypeId)!;
+        let unitPrice = ticketType.price;
+
+        // Apply discount if promo code
+        if (discountAmount > 0 && promoCode) {
+          const discountRatio = discountAmount / subtotal;
+          unitPrice = Math.floor(ticketType.price * (1 - discountRatio));
+        }
+
+        // Total amount for this line item (unit price * quantity)
+        const lineAmount = unitPrice * item.quantity;
+
+        await stripe.invoiceItems.create({
+          customer: stripeCustomerId,
+          amount: lineAmount,
+          currency: "jpy",
+          description: promoCode
+            ? `${ticketType.name}（${promoCode.name}適用）× ${item.quantity}`
+            : `${ticketType.name} × ${item.quantity}`,
+        });
+      }
+
+      // Add tax as invoice item
+      await stripe.invoiceItems.create({
+        customer: stripeCustomerId,
+        amount: tax,
+        currency: "jpy",
+        description: "消費税（10%）",
+      });
+
+      // JTF's Qualified Invoice Issuer Number (適格請求書発行事業者番号)
+      const JTF_INVOICE_REGISTRATION_NUMBER = "T1234567890123";
+
+      // Create and finalize the invoice
+      const invoice = await stripe.invoices.create({
+        customer: stripeCustomerId,
+        collection_method: "send_invoice",
+        due_date: dueDate,
+        auto_advance: true, // Auto-finalize
+        metadata: {
+          order_id: order.id,
+          user_id: user.id,
+          promo_code_id: promoCode?.id || "",
+        },
+        custom_fields: [
+          {
+            name: "注文番号",
+            value: order.order_number,
+          },
+          {
+            name: "登録番号",
+            value: JTF_INVOICE_REGISTRATION_NUMBER,
+          },
+        ],
+        footer: `一般社団法人日本翻訳連盟\n適格請求書発行事業者登録番号: ${JTF_INVOICE_REGISTRATION_NUMBER}`,
+      });
+
+      // Finalize and send the invoice
+      const finalizedInvoice = await stripe.invoices.finalizeInvoice(invoice.id);
+      await stripe.invoices.sendInvoice(invoice.id);
+
+      // Update order with Stripe invoice ID
+      await supabase
+        .from("orders")
+        .update({ stripe_invoice_id: invoice.id })
+        .eq("id", order.id);
+
+      return NextResponse.json({
+        invoiceId: invoice.id,
+        invoiceUrl: finalizedInvoice.hosted_invoice_url,
+        invoicePdf: finalizedInvoice.invoice_pdf,
+      });
+    }
+
+    // Configure payment methods based on selected payment method
+    const paymentMethodTypes: ("card" | "customer_balance")[] =
+      paymentMethod === "bank_transfer"
+        ? ["customer_balance"]
+        : ["card"];
+
+    // Build session options
+    const sessionOptions: Stripe.Checkout.SessionCreateParams = {
       mode: "payment",
-      payment_method_types: ["card"],
+      payment_method_types: paymentMethodTypes,
       line_items: stripeLineItems,
       success_url: `${baseUrl}/mypage/orders/${order.id}?success=true`,
       cancel_url: `${baseUrl}/ticket?cancelled=true`,
-      customer_email: user.email,
+      customer: stripeCustomerId,
       metadata: {
         order_id: order.id,
         user_id: user.id,
         promo_code_id: promoCode?.id || "",
+        payment_method: paymentMethod,
       },
       locale: "ja",
-    });
+    };
 
-    // Record promo code usage
-    if (promoCode) {
-      await supabase.rpc("use_promo_code", {
-        p_promo_code_id: promoCode.id,
-        p_user_id: user.id,
-        p_order_id: order.id,
-      });
+    // Add bank transfer specific options
+    if (paymentMethod === "bank_transfer") {
+      sessionOptions.payment_method_options = {
+        customer_balance: {
+          funding_type: "bank_transfer",
+          bank_transfer: {
+            type: "jp_bank_transfer",
+          },
+        },
+      };
+      // Set expiration for bank transfer (7 days)
+      sessionOptions.expires_at = Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60;
     }
+
+    const session = await stripe.checkout.sessions.create(sessionOptions);
+
+    // Note: Promo code usage is recorded in the webhook when payment completes
+    // This prevents codes from being marked as used when payment is cancelled
 
     // Update order with Stripe session ID
     await supabase

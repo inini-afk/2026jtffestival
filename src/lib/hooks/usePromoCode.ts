@@ -23,6 +23,7 @@ interface UsePromoCodeResult {
   error: string | null;
   validateCode: (code: string) => Promise<boolean>;
   clearPromoCode: () => void;
+  setPromoCodeDirectly: (code: PromoCode) => void;
 }
 
 export function usePromoCode(): UsePromoCodeResult {
@@ -79,12 +80,18 @@ export function usePromoCode(): UsePromoCodeResult {
     setError(null);
   }, []);
 
+  const setPromoCodeDirectly = useCallback((code: PromoCode) => {
+    setPromoCode(code);
+    setError(null);
+  }, []);
+
   return {
     promoCode,
     isLoading,
     error,
     validateCode,
     clearPromoCode,
+    setPromoCodeDirectly,
   };
 }
 

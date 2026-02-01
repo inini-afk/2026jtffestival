@@ -5,7 +5,7 @@ export default function Home() {
   return (
     <>
       <BackgroundOrbs />
-      <Navigation />
+      /<Navigation />
 
       {/* Hero Section */}
       <header className="relative h-screen flex flex-col items-center justify-center text-center px-4 overflow-hidden">

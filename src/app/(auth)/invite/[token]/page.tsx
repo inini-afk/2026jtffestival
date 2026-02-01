@@ -117,8 +117,8 @@ export default function InviteAcceptPage() {
         throw new Error(data.error || "招待の受け入れに失敗しました");
       }
 
-      // Redirect to attendee page
-      router.push("/attendee?welcome=true");
+      // Redirect to unified mypage
+      router.push("/mypage?welcome=true");
     } catch (err) {
       console.error("Registration error:", err);
       setFormError(
