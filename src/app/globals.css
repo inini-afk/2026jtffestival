@@ -99,3 +99,17 @@ body {
   background: white;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
 }
+
+/* Venue Card (for date-venue page) */
+.venue-card {
+  background: white;
+  border-radius: 20px;
+  border: 1px solid #e5e5e7;
+  padding: 40px;
+  transition: all 0.3s ease;
+}
+
+.venue-card:hover {
+  border-color: #d1d1d6;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+}
