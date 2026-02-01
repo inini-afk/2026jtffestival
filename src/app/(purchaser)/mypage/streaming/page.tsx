@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useAuth } from "@/lib/hooks";
 import { createClient } from "@/lib/supabase/client";
 import { Navigation, BackgroundOrbs } from "@/components";
@@ -13,8 +14,8 @@ interface Session {
   description: string;
   duration: string;
   thumbnail: string;
-  category: string;
-  categoryLabel: string;
+  tags: string[];
+  type: "seminar" | "sponsor";
 }
 
 // ダミーセッションデータ（MicroCMS接続後に置き換え）
@@ -23,219 +24,148 @@ const SESSIONS: Session[] = [
     id: "session-1",
     title: "AIと共存する翻訳者のキャリア戦略",
     speaker: "山田 太郎",
-    description:
-      "20年以上の翻訳業界経験を持ち、テクノロジーと人間の協働について研究。生成AI時代における翻訳者の新しい役割と価値創造について語ります。",
+    description: "生成AI時代における翻訳者の新しい役割と価値創造について語ります。",
     duration: "45分",
     thumbnail: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=800&h=450&fit=crop",
-    category: "keynote",
-    categoryLabel: "基調講演",
+    tags: ["基調講演", "キャリア", "AI"],
+    type: "seminar",
   },
   {
     id: "session-2",
     title: "グローバル企業のローカライゼーション戦略",
     speaker: "Sarah Johnson",
-    description:
-      "Fortune 500企業でのローカライゼーション戦略を15年間リード。多言語展開とブランド一貫性の両立について、実践的な知見を共有します。",
+    description: "多言語展開とブランド一貫性の両立について、実践的な知見を共有します。",
     duration: "50分",
     thumbnail: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=800&h=450&fit=crop",
-    category: "keynote",
-    categoryLabel: "基調講演",
+    tags: ["基調講演", "ローカライゼーション", "グローバル"],
+    type: "seminar",
   },
   {
     id: "session-3",
     title: "医薬翻訳における品質管理の最前線",
     speaker: "鈴木 美咲",
-    description:
-      "医薬品の承認申請書類翻訳のスペシャリスト。規制要件を満たしながら効率的に高品質な翻訳を提供するためのワークフローを解説します。",
+    description: "規制要件を満たしながら効率的に高品質な翻訳を提供するためのワークフローを解説します。",
     duration: "60分",
     thumbnail: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=800&h=450&fit=crop",
-    category: "workshop",
-    categoryLabel: "ワークショップ",
+    tags: ["医薬", "品質管理", "ワークショップ"],
+    type: "seminar",
   },
   {
     id: "session-4",
     title: "大規模言語モデルと翻訳の未来",
     speaker: "Michael Chen",
-    description:
-      "最先端のNLP研究者として、GPTやその他のLLMが翻訳業界に与える影響と、今後5年間の技術トレンドを予測します。",
+    description: "GPTやその他のLLMが翻訳業界に与える影響と、今後5年間の技術トレンドを予測します。",
     duration: "55分",
     thumbnail: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&h=450&fit=crop",
-    category: "ai",
-    categoryLabel: "AI・テクノロジー",
+    tags: ["AI", "LLM", "テクノロジー"],
+    type: "seminar",
   },
   {
     id: "session-5",
     title: "特許翻訳のクオリティコントロール",
     speaker: "田中 健一",
-    description:
-      "30年以上の特許翻訳経験を活かし、技術文書の正確性と法的要件を両立させる手法について、具体的な事例とともに解説します。",
+    description: "技術文書の正確性と法的要件を両立させる手法について、具体的な事例とともに解説します。",
     duration: "50分",
     thumbnail: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=800&h=450&fit=crop",
-    category: "workshop",
-    categoryLabel: "ワークショップ",
+    tags: ["特許", "品質管理", "法務"],
+    type: "seminar",
   },
   {
     id: "session-6",
     title: "機械翻訳APIの実践的活用法",
     speaker: "David Kim",
-    description:
-      "翻訳テクノロジー企業の技術責任者として、MT APIを業務に統合するためのベストプラクティスとピットフォールを共有します。",
+    description: "MT APIを業務に統合するためのベストプラクティスとピットフォールを共有します。",
     duration: "45分",
     thumbnail: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=800&h=450&fit=crop",
-    category: "ai",
-    categoryLabel: "AI・テクノロジー",
+    tags: ["AI", "機械翻訳", "API"],
+    type: "seminar",
+  },
+  // スポンサーセミナー
+  {
+    id: "sponsor-1",
+    title: "次世代翻訳支援ツールの紹介",
+    speaker: "株式会社トランステック",
+    description: "最新のCAT機能と生成AI統合による翻訳ワークフローの革新をご紹介します。",
+    duration: "30分",
+    thumbnail: "https://images.unsplash.com/photo-1551434678-e076c223a692?w=800&h=450&fit=crop",
+    tags: ["ツール", "CAT", "生成AI"],
+    type: "sponsor",
+  },
+  {
+    id: "sponsor-2",
+    title: "クラウド翻訳管理システムの最新動向",
+    speaker: "グローバルワークス株式会社",
+    description: "リモートワーク時代に対応した翻訳プロジェクト管理の新しいアプローチ。",
+    duration: "30分",
+    thumbnail: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=450&fit=crop",
+    tags: ["クラウド", "プロジェクト管理", "リモートワーク"],
+    type: "sponsor",
+  },
+  {
+    id: "sponsor-3",
+    title: "品質評価AIの実用化に向けて",
+    speaker: "AIトランスレーション株式会社",
+    description: "AIによる翻訳品質の自動評価技術の現状と今後の展望。",
+    duration: "30分",
+    thumbnail: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&h=450&fit=crop",
+    tags: ["AI", "品質評価", "自動化"],
+    type: "sponsor",
   },
 ];
 
-const CATEGORIES = [
-  { id: "keynote", label: "基調講演", icon: "🎤" },
-  { id: "workshop", label: "ワークショップ", icon: "🛠" },
-  { id: "ai", label: "AI・テクノロジー", icon: "🤖" },
-];
+// 全タグを抽出
+const ALL_TAGS = Array.from(new Set(SESSIONS.flatMap((s) => s.tags))).sort();
 
-function getCategoryColor(category: string) {
-  switch (category) {
-    case "keynote":
-      return "bg-red-500";
-    case "workshop":
-      return "bg-green-500";
-    case "ai":
-      return "bg-blue-500";
-    default:
-      return "bg-gray-500";
-  }
-}
-
-// Horizontal scroll carousel component
-function SessionCarousel({
-  title,
-  icon,
-  sessions,
-}: {
-  title: string;
-  icon: string;
-  sessions: Session[];
-}) {
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(true);
-
-  const checkScroll = () => {
-    if (scrollRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
-      setCanScrollLeft(scrollLeft > 0);
-      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
-    }
-  };
-
-  const scroll = (direction: "left" | "right") => {
-    if (scrollRef.current) {
-      const scrollAmount = 400;
-      scrollRef.current.scrollBy({
-        left: direction === "left" ? -scrollAmount : scrollAmount,
-        behavior: "smooth",
-      });
-    }
-  };
-
-  useEffect(() => {
-    checkScroll();
-    const ref = scrollRef.current;
-    if (ref) {
-      ref.addEventListener("scroll", checkScroll);
-      return () => ref.removeEventListener("scroll", checkScroll);
-    }
-  }, []);
-
-  if (sessions.length === 0) return null;
-
+function SessionCard({ session }: { session: Session }) {
   return (
-    <section className="mb-12">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-bold flex items-center gap-2">
-          <span>{icon}</span>
-          {title}
-          <span className="text-sm font-normal text-gray-400 ml-2">
-            {sessions.length}本
-          </span>
-        </h2>
-        <div className="flex gap-2">
-          <button
-            onClick={() => scroll("left")}
-            disabled={!canScrollLeft}
-            className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
-              canScrollLeft
-                ? "bg-white/10 hover:bg-white/20 text-white"
-                : "bg-white/5 text-gray-600 cursor-not-allowed"
-            }`}
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+    <Link
+      href={`/watch/${session.id}`}
+      className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100"
+    >
+      {/* Thumbnail */}
+      <div className="relative aspect-video overflow-hidden bg-gray-100">
+        <img
+          src={session.thumbnail}
+          alt={session.title}
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+        />
+        {/* Duration badge */}
+        <div className="absolute bottom-3 right-3 bg-black/80 text-white text-xs px-2 py-1 rounded-md font-medium">
+          {session.duration}
+        </div>
+        {/* Play overlay */}
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
+          <div className="w-14 h-14 bg-white/90 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transform scale-75 group-hover:scale-100 transition-all duration-300 shadow-lg">
+            <svg className="w-6 h-6 text-gray-900 ml-1" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
             </svg>
-          </button>
-          <button
-            onClick={() => scroll("right")}
-            disabled={!canScrollRight}
-            className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
-              canScrollRight
-                ? "bg-white/10 hover:bg-white/20 text-white"
-                : "bg-white/5 text-gray-600 cursor-not-allowed"
-            }`}
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
+          </div>
         </div>
       </div>
 
-      <div
-        ref={scrollRef}
-        className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 -mx-6 px-6"
-        style={{ scrollSnapType: "x mandatory" }}
-      >
-        {sessions.map((session) => (
-          <Link
-            key={session.id}
-            href={`/watch/${session.id}`}
-            className="flex-shrink-0 w-[300px] group"
-            style={{ scrollSnapAlign: "start" }}
-          >
-            <div className="relative aspect-video rounded-xl overflow-hidden bg-gray-800 mb-3">
-              <img
-                src={session.thumbnail}
-                alt={session.title}
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-              />
-              {/* Gradient overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
+      {/* Content */}
+      <div className="p-4">
+        {/* Tags */}
+        <div className="flex flex-wrap gap-1.5 mb-3">
+          {session.tags.slice(0, 3).map((tag) => (
+            <span
+              key={tag}
+              className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full"
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
 
-              {/* Play button */}
-              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
-                <div className="w-14 h-14 bg-white rounded-full flex items-center justify-center shadow-xl transform scale-75 group-hover:scale-100 transition-transform">
-                  <svg className="w-6 h-6 text-gray-900 ml-1" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
-                  </svg>
-                </div>
-              </div>
+        {/* Title */}
+        <h3 className="font-bold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2 mb-2">
+          {session.title}
+        </h3>
 
-              {/* Duration */}
-              <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded font-medium">
-                {session.duration}
-              </div>
-
-              {/* Category indicator */}
-              <div className={`absolute top-2 left-2 w-1 h-8 rounded-full ${getCategoryColor(session.category)}`} />
-            </div>
-
-            <h3 className="font-semibold text-white group-hover:text-blue-400 transition-colors line-clamp-2 mb-1">
-              {session.title}
-            </h3>
-            <p className="text-sm text-gray-400">{session.speaker}</p>
-          </Link>
-        ))}
+        {/* Speaker */}
+        <p className="text-sm text-gray-500">{session.speaker}</p>
       </div>
-    </section>
+    </Link>
   );
 }
 
@@ -243,6 +173,9 @@ export default function StreamingPage() {
   const { user, loading: authLoading } = useAuth();
   const [hasOnlineAccess, setHasOnlineAccess] = useState(false);
   const [checking, setChecking] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [activeTab, setActiveTab] = useState<"seminar" | "sponsor">("seminar");
 
   useEffect(() => {
     if (authLoading) return;
@@ -274,19 +207,54 @@ export default function StreamingPage() {
     checkAccess();
   }, [user, authLoading]);
 
-  // Featured session (first keynote)
-  const featuredSession = SESSIONS.find((s) => s.category === "keynote");
+  // Filter sessions
+  const filteredSessions = useMemo(() => {
+    return SESSIONS.filter((session) => {
+      // Type filter
+      if (session.type !== activeTab) return false;
 
-  // Sessions grouped by category
-  const sessionsByCategory = CATEGORIES.map((cat) => ({
-    ...cat,
-    sessions: SESSIONS.filter((s) => s.category === cat.id),
-  }));
+      // Search filter
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        const matchesSearch =
+          session.title.toLowerCase().includes(query) ||
+          session.speaker.toLowerCase().includes(query) ||
+          session.description.toLowerCase().includes(query) ||
+          session.tags.some((tag) => tag.toLowerCase().includes(query));
+        if (!matchesSearch) return false;
+      }
+
+      // Tag filter
+      if (selectedTags.length > 0) {
+        const hasSelectedTag = selectedTags.some((tag) =>
+          session.tags.includes(tag)
+        );
+        if (!hasSelectedTag) return false;
+      }
+
+      return true;
+    });
+  }, [searchQuery, selectedTags, activeTab]);
+
+  const toggleTag = (tag: string) => {
+    setSelectedTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+    );
+  };
+
+  const clearFilters = () => {
+    setSearchQuery("");
+    setSelectedTags([]);
+  };
+
+  // Count by type
+  const seminarCount = SESSIONS.filter((s) => s.type === "seminar").length;
+  const sponsorCount = SESSIONS.filter((s) => s.type === "sponsor").length;
 
   if (authLoading || checking) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500" />
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
       </div>
     );
   }
@@ -347,118 +315,143 @@ export default function StreamingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a]">
+    <>
+      <BackgroundOrbs />
       <Navigation />
 
-      <main className="pt-20 pb-20">
-        {/* Hero Section - Featured Session */}
-        {featuredSession && (
-          <section className="relative h-[70vh] min-h-[500px] mb-12">
-            {/* Background image */}
-            <div className="absolute inset-0">
-              <img
-                src={featuredSession.thumbnail}
-                alt={featuredSession.title}
-                className="w-full h-full object-cover"
+      <main className="pt-24 pb-20 px-6">
+        <div className="max-w-7xl mx-auto">
+          {/* Header */}
+          <div className="mb-8">
+            <Link
+              href="/mypage"
+              className="text-sm text-gray-500 hover:text-gray-700 mb-4 inline-flex items-center gap-2 transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              マイページに戻る
+            </Link>
+            <h1 className="text-3xl font-bold">オンデマンド配信</h1>
+            <p className="text-gray-500 mt-2">
+              全{SESSIONS.length}セッションをいつでも視聴できます
+            </p>
+          </div>
+
+          {/* Search and Filter */}
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-8">
+            {/* Search bar */}
+            <div className="relative mb-4">
+              <input
+                type="text"
+                placeholder="セッションを検索..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
-              <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a] via-[#0a0a0a]/70 to-transparent" />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-[#0a0a0a]/30" />
+              <svg
+                className="w-5 h-5 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
             </div>
 
-            {/* Content */}
-            <div className="relative h-full max-w-7xl mx-auto px-6 flex items-center">
-              <div className="max-w-2xl">
-                <Link href="/mypage" className="text-sm text-gray-400 hover:text-white mb-6 inline-flex items-center gap-2 transition-colors">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                  </svg>
-                  マイページに戻る
-                </Link>
-
-                <div className="flex items-center gap-3 mb-4">
-                  <span className="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded">
-                    注目
-                  </span>
-                  <span className="text-gray-300 text-sm">
-                    {featuredSession.categoryLabel}
-                  </span>
-                </div>
-
-                <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 leading-tight">
-                  {featuredSession.title}
-                </h1>
-
-                <p className="text-lg text-gray-300 mb-2">
-                  {featuredSession.speaker}
-                </p>
-
-                <p className="text-gray-400 mb-8 line-clamp-3 max-w-xl">
-                  {featuredSession.description}
-                </p>
-
-                <div className="flex items-center gap-4">
-                  <Link
-                    href={`/watch/${featuredSession.id}`}
-                    className="inline-flex items-center gap-3 bg-white text-black px-8 py-4 rounded-lg font-semibold hover:bg-gray-200 transition-colors"
-                  >
-                    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
-                    </svg>
-                    再生する
-                  </Link>
-                  <span className="text-gray-400 text-sm">
-                    {featuredSession.duration}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* Category Carousels */}
-        <div className="max-w-7xl mx-auto px-6">
-          {/* Stats bar */}
-          <div className="flex items-center gap-6 mb-8 pb-6 border-b border-white/10">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-white">{SESSIONS.length}</div>
-              <div className="text-xs text-gray-400">セッション</div>
-            </div>
-            <div className="w-px h-10 bg-white/10" />
-            <div className="text-center">
-              <div className="text-2xl font-bold text-white">
-                {SESSIONS.reduce((acc, s) => acc + parseInt(s.duration), 0)}分
-              </div>
-              <div className="text-xs text-gray-400">総収録時間</div>
-            </div>
-            <div className="w-px h-10 bg-white/10" />
-            <div className="text-center">
-              <div className="text-2xl font-bold text-white">{CATEGORIES.length}</div>
-              <div className="text-xs text-gray-400">カテゴリー</div>
+            {/* Tags */}
+            <div className="flex flex-wrap gap-2">
+              {ALL_TAGS.map((tag) => (
+                <button
+                  key={tag}
+                  onClick={() => toggleTag(tag)}
+                  className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                    selectedTags.includes(tag)
+                      ? "bg-blue-600 text-white"
+                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  }`}
+                >
+                  {tag}
+                </button>
+              ))}
+              {(searchQuery || selectedTags.length > 0) && (
+                <button
+                  onClick={clearFilters}
+                  className="px-3 py-1.5 rounded-full text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
+                >
+                  クリア
+                </button>
+              )}
             </div>
           </div>
 
-          {/* Carousels by category */}
-          {sessionsByCategory.map((category) => (
-            <SessionCarousel
-              key={category.id}
-              title={category.label}
-              icon={category.icon}
-              sessions={category.sessions}
-            />
-          ))}
+          {/* Tabs */}
+          <div className="flex gap-2 mb-8">
+            <button
+              onClick={() => setActiveTab("seminar")}
+              className={`px-6 py-3 rounded-xl font-medium transition-colors ${
+                activeTab === "seminar"
+                  ? "bg-blue-600 text-white"
+                  : "bg-white text-gray-600 hover:bg-gray-50 border border-gray-200"
+              }`}
+            >
+              セミナープログラム
+              <span className={`ml-2 text-sm ${activeTab === "seminar" ? "text-blue-200" : "text-gray-400"}`}>
+                ({seminarCount})
+              </span>
+            </button>
+            <button
+              onClick={() => setActiveTab("sponsor")}
+              className={`px-6 py-3 rounded-xl font-medium transition-colors ${
+                activeTab === "sponsor"
+                  ? "bg-blue-600 text-white"
+                  : "bg-white text-gray-600 hover:bg-gray-50 border border-gray-200"
+              }`}
+            >
+              スポンサーセミナー
+              <span className={`ml-2 text-sm ${activeTab === "sponsor" ? "text-blue-200" : "text-gray-400"}`}>
+                ({sponsorCount})
+              </span>
+            </button>
+          </div>
+
+          {/* Results count */}
+          {(searchQuery || selectedTags.length > 0) && (
+            <p className="text-sm text-gray-500 mb-4">
+              {filteredSessions.length}件のセッションが見つかりました
+            </p>
+          )}
+
+          {/* Session Grid */}
+          {filteredSessions.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {filteredSessions.map((session) => (
+                <SessionCard key={session.id} session={session} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-16">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <p className="text-gray-500 mb-4">条件に一致するセッションが見つかりませんでした</p>
+              <button
+                onClick={clearFilters}
+                className="text-blue-600 hover:underline"
+              >
+                フィルターをクリア
+              </button>
+            </div>
+          )}
         </div>
       </main>
-
-      {/* Custom scrollbar hide style */}
-      <style jsx global>{`
-        .scrollbar-hide {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-        .scrollbar-hide::-webkit-scrollbar {
-          display: none;
-        }
-      `}</style>
-    </div>
+    </>
   );
 }
